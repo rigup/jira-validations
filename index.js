@@ -30,6 +30,8 @@ const Action = require("./action");
     const action = new Action({ github, jira });
     const valid = await action.validate(verifyFromInput);
 
+    console.log({ valid });
+
     if (!valid && failInvalidInput === "true") {
       core.setFailed("Validation Failed!");
     }
