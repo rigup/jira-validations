@@ -8,7 +8,7 @@ inputs:
   fail-invalid: # id of input
     description: "Describe how to fail if we have an invalid Jira ID. Can be 'true', 'false' or 'checks'"
     required: true
-    default: "checks"
+    default: "true"
 outputs:
   verified: # id of output
     description: "Will be 'true' if it passed all checks, 'false' otherwise"

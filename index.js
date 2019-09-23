@@ -40,7 +40,7 @@ const Action = require("./action");
       console.log(`TODO: Send GitHub Check`);
     }
 
-    core.setOutput("verified", valid);
+    core.setOutput("verified", `${valid}`);
 
     console.log(`The context: ${JSON.stringify(github.context, null, 2)}`);
   } catch (error) {
