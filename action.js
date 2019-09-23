@@ -51,14 +51,15 @@ module.exports = class {
     switch (type) {
       case "all":
         _valid =
-          (await validateCommitsHaveIssueIds()) && validateBranchHasIssueId();
+          (await this.validateCommitsHaveIssueIds()) &&
+          this.validateBranchHasIssueId();
         break;
       case "commits":
-        _valid = await validateCommitsHaveIssueIds();
+        _valid = await this.validateCommitsHaveIssueIds();
         break;
       case "branch":
       default:
-        _valid = validateBranchHasIssueId();
+        _valid = this.validateBranchHasIssueId();
     }
 
     if (!_valid) return false;
