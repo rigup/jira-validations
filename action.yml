@@ -1,0 +1,17 @@
+name: "Jira Validations"
+description: "Verify PR/Push has required Jira Info"
+inputs:
+  verify-from: # id of input
+    description: "Where to verify Jira Issue IDs. Can be 'branch', 'commits' or 'all'"
+    required: true
+    default: "branch"
+  fail-invalid: # id of input
+    description: "Describe how to fail if we have an invalid Jira ID. Can be 'true', 'false' or 'checks'"
+    required: true
+    default: "checks"
+outputs:
+  verified: # id of output
+    description: "Will be 'true' if it passed all checks, 'false' otherwise"
+runs:
+  using: "node12"
+  main: "index.js"
