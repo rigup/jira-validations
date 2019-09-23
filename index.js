@@ -38,10 +38,6 @@ const Action = require("./action");
       console.log(`TODO: Send GitHub Check`);
     }
 
-    if (!valid && failInvalidInput === "false") {
-      core.setNeutral();
-    }
-
     core.setOutput("verified", valid);
 
     console.log(`The context: ${JSON.stringify(github.context, null, 2)}`);
