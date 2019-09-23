@@ -14,7 +14,7 @@ module.exports = class {
     if (matcher === null) return false;
 
     console.log({ input, matcher });
-    this.issueIds.push(matcher);
+    this.issueIds.add(matcher[0]);
     return true;
   }
 
