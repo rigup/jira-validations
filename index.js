@@ -11,12 +11,12 @@ try {
     throw new Error("Please specify JIRA_USER_EMAIL env");
 
   // `verify-from` input defined in action metadata file
-  const verifyFrom = core.getInput("verify-from");
-  console.log(`Verifying Issue ID from ${verifyFrom}`);
+  const verifyFromInput = core.getInput("verify-from");
+  console.log(`Verifying Issue ID from ${verifyFromInput}`);
 
   // `fail-invalid` input defined in action metadata file
-  const failInvalid = core.getInput("fail-invalid");
-  console.log(`Fail Invalid? ${failInvalid}`);
+  const failInvalidInput = core.getInput("fail-invalid");
+  console.log(`Fail Invalid? ${failInvalidInput}`);
 
   // Get the JSON webhook payload for the event that triggered the workflow
   const payload = JSON.stringify(github.context.payload, undefined, 2);
