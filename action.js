@@ -2,7 +2,7 @@ const JIRA_IDENTIFIER = /[A-Z]+-\d+/g;
 
 module.exports = class {
   constructor({ github, jira }) {
-    this.githubEvent = github.context.githubEvent;
+    this.githubEvent = github.context.payload;
     this.eventName = github.context.eventName;
     this.Jira = jira;
     this.valid = false;
