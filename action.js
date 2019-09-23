@@ -19,6 +19,8 @@ module.exports = class {
   }
 
   validateTitleHasIssueId() {
+    if (this.eventName === "push") return true;
+
     return this.validateStringHasIssueId(this.githubEvent.pull_request.title);
   }
 
