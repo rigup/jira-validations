@@ -13,7 +13,6 @@ jobs:
       uses: rigup/jira-validations@master
       with:
         verify-from: 'branch'
-        fail-invalid: 'false'
     # Use the output from the `jira-validations` step
     - name: Get the output verified
-      run: echo "Verified: ${{ steps.jira-validations.outputs.verified }}"
+      run: echo "Verified"
