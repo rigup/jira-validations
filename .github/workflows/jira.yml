@@ -1,24 +1,23 @@
-name: Validate
-on: [push]
+name: Validate PR
+on: [pull_request]
 
 jobs:
-  validate_job:
+  validate_pr_job:
     runs-on: ubuntu-latest
-    name: Validate Jira
-    
+    name: Validate Jira PR
+
     steps:
-    - name: Validate Jira step
-      id: jira
-      uses: rigup/jira-validations@master
-      with:
-        verify-from: 'branch'
-        fail-invalid: 'true'
-      env:
-        JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
-        
-    # Use the output from the `jira` step
-    - name: Get the output 
-      run: echo "Verified ${{ steps.jira.outputs.verified }}"
-      
+      - name: Validate Jira step
+        id: jira-pr
+        uses: rigup/jira-validations@master
+        with:
+          verify-from: "branch"
+          fail-invalid: "true"
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+
+      # Use the output from the `jira` step
+      - name: Get the output
+        run: echo "Verified ${{ steps.jira-pr.outputs.verified }}"
