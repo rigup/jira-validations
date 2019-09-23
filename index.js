@@ -3,47 +3,49 @@ const github = require("@actions/github");
 const Jira = require("./common/net/jira");
 const Action = require("./action");
 
-try {
-  if (!process.env.JIRA_BASE_URL)
-    throw new Error("Please specify JIRA_BASE_URL env");
-  if (!process.env.JIRA_API_TOKEN)
-    throw new Error("Please specify JIRA_API_TOKEN env");
-  if (!process.env.JIRA_USER_EMAIL)
-    throw new Error("Please specify JIRA_USER_EMAIL env");
+(async () => {
+  try {
+    if (!process.env.JIRA_BASE_URL)
+      throw new Error("Please specify JIRA_BASE_URL env");
+    if (!process.env.JIRA_API_TOKEN)
+      throw new Error("Please specify JIRA_API_TOKEN env");
+    if (!process.env.JIRA_USER_EMAIL)
+      throw new Error("Please specify JIRA_USER_EMAIL env");
 
-  // `verify-from` input defined in action.yml
-  const verifyFromInput = core.getInput("verify-from");
-  console.log(`Verifying Issue ID from ${verifyFromInput}`);
+    // `verify-from` input defined in action.yml
+    const verifyFromInput = core.getInput("verify-from");
+    console.log(`Verifying Issue ID from ${verifyFromInput}`);
 
-  // `fail-invalid` input defined in action.yml
-  const failInvalidInput = core.getInput("fail-invalid");
-  console.log(`Verifying Issue ID from ${failInvalidInput}`);
+    // `fail-invalid` input defined in action.yml
+    const failInvalidInput = core.getInput("fail-invalid");
+    console.log(`Verifying Issue ID from ${failInvalidInput}`);
 
-  const config = {
-    baseUrl: process.env.JIRA_BASE_URL,
-    token: process.env.JIRA_API_TOKEN,
-    email: process.env.JIRA_USER_EMAIL
-  };
+    const config = {
+      baseUrl: process.env.JIRA_BASE_URL,
+      token: process.env.JIRA_API_TOKEN,
+      email: process.env.JIRA_USER_EMAIL
+    };
 
-  const jira = new Jira(config);
-  const action = new Action({ github, jira });
-  const valid = await action.validate(verifyFromInput);
+    const jira = new Jira(config);
+    const action = new Action({ github, jira });
+    const valid = await action.validate(verifyFromInput);
 
-  if (!valid && failInvalidInput === "true") {
-    core.setFailed("Validation Failed!");
+    if (!valid && failInvalidInput === "true") {
+      core.setFailed("Validation Failed!");
+    }
+
+    if (!valid && failInvalidInput === "checks") {
+      console.log(`TODO: Send GitHub Check`);
+    }
+
+    if (!valid && failInvalidInput === "false") {
+      core.setNeutral();
+    }
+
+    core.setOutput("verified", valid);
+
+    console.log(`The context: ${JSON.stringify(github.context, null, 2)}`);
+  } catch (error) {
+    core.setFailed(error.message);
   }
-
-  if (!valid && failInvalidInput === "checks") {
-    console.log(`TODO: Send GitHub Check`);
-  }
-
-  if (!valid && failInvalidInput === "false") {
-    core.setNeutral();
-  }
-
-  core.setOutput("verified", valid);
-
-  console.log(`The context: ${JSON.stringify(github.context, null, 2)}`);
-} catch (error) {
-  core.setFailed(error.message);
-}
+})();
