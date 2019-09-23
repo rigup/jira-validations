@@ -1,18 +1,16 @@
-name: Jira Validations
-on:
-  pull_request:
-     types: [assigned, opened, synchronize, reopened]
+on: [push]
 
 jobs:
-  validate:
+  validate_job:
     runs-on: ubuntu-latest
-    name: Validate Jira Issue ID V2
+    name: A job
     steps:
-    - name: Verify PR has Jira Issue ID V2
-      id: jira-validations
+    - name: Validate Jira step
+      id: jira
       uses: rigup/jira-validations@master
       with:
         verify-from: 'branch'
-    # Use the output from the `jira-validations` step
-    - name: Get the output verified
-      run: echo "Verified"
+        fail-invalid: 'false'
+    # Use the output from the `jira` step
+    - name: Get the output 
+      run: echo "The time was ${{ steps.jira.outputs.verified }}"
