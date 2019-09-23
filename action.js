@@ -23,15 +23,18 @@ module.exports = class {
   }
 
   validateBranchHasIssueId() {
-    console.log("Branch: " + this.githubEvent.head);
+    console.log("Branch: " + this.githubEvent.pull_request.head);
     return (
-      this.githubEvent.head &&
-      this.validateStringHasIssueId(this.githubEvent.head.ref)
+      this.githubEvent.pull_request.head &&
+      this.validateStringHasIssueId(this.githubEvent.pull_request.head.ref)
     );
   }
 
   async validateCommitsHaveIssueIds() {
-    if (this.eventName === "push" && this.githubEvent.base.ref === "master")
+    if (
+      this.eventName === "push" &&
+      this.githubEvent.pull_request.base.ref === "master"
+    )
       return true;
     else this.githubEvent.commits = await getCommits();
 
