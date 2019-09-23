@@ -23,7 +23,7 @@ If Jira Issue ID is valid
 ## Example usage
 
 ```
-uses: actions/jira-validations@v1
+uses: rigup/jira-validations@v1
 with:
   verify-from: 'branch'
   fail-invalid: 'true'
