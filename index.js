@@ -30,7 +30,7 @@ try {
   //   this.jira = new jira(config);
 
   core.setOutput("verified", true);
-  console.log(`The event payload: ${payload}`);
+  console.log(`The context: ${JSON.stringify(github.context)}`);
 } catch (error) {
   core.setFailed(error.message);
 }
