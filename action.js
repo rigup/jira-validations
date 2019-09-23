@@ -18,18 +18,19 @@ module.exports = class {
     return true;
   }
 
+  // TODO - Test this
   validateTitleHasIssueId() {
     return this.validateStringHasIssueId(this.githubEvent.pull_request.title);
   }
 
   validateBranchHasIssueId() {
-    console.log("Branch: " + this.githubEvent.pull_request.head);
     return (
       this.githubEvent.pull_request.head &&
       this.validateStringHasIssueId(this.githubEvent.pull_request.head.ref)
     );
   }
 
+  // TODO - Test this
   async validateCommitsHaveIssueIds() {
     if (
       this.eventName === "push" &&
@@ -75,15 +76,17 @@ module.exports = class {
     return issues && issues.hasOwnProperty("issue");
   }
 
+  // TODO - Test this
   async getCommits() {
     const { data } = await github.Github.listCommitsOnPullRequest({
       repo: this.githubEvent.pull_request.repository.name,
-      pullNumber: this.githubEvent.pull_request.number
+      pullNumber: this.githubEvent.number
     });
 
     return data;
   }
 
+  // TODO - Test this
   async getIssues() {
     for (const issueKey of this.issueIds) {
       const issue = await this.Jira.getIssue(issueKey);

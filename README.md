@@ -10,9 +10,9 @@ This action prints verfied 'true' or 'false' if the github event contains a vali
 
 ### `fail-invalid`
 
-**Required** Can be `true`, `false` or `'checks'`. Default `'checks'`.
+**Required** Can be `true`, or `false`. Default `'true'`.
 
-`'checks'` Will send a successful / failed github check
+If false, will fail a GitHub Check if Validation fails, otherwise all checks will pass.
 
 ## Outputs
 
@@ -23,8 +23,28 @@ If Jira Issue ID is valid
 ## Example usage
 
 ```
-uses: rigup/jira-validations@v1
-with:
-  verify-from: 'branch'
-  fail-invalid: 'true'
+name: Validate PR
+on: [pull_request]
+
+jobs:
+  validate_pr_job:
+    runs-on: ubuntu-latest
+    name: Validate Jira PR
+
+    steps:
+      - name: Validate Jira step
+        id: jira-pr
+        uses: rigup/jira-validations@master
+        with:
+          verify-from: "branch"
+          fail-invalid: "true"
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+
+      # Use the output from the `jira` step
+      - name: Get the output
+        run: echo "Verified ${{ steps.jira-pr.outputs.verified }}"
+
 ```
