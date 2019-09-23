@@ -23,7 +23,10 @@ module.exports = class {
   }
 
   validateBranchHasIssueId() {
-    return this.validateStringHasIssueId(this.githubEvent.head.ref);
+    return (
+      this.githubEvent.head &&
+      this.validateStringHasIssueId(this.githubEvent.head.ref)
+    );
   }
 
   async validateCommitsHaveIssueIds() {
