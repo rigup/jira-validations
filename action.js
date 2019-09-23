@@ -23,6 +23,7 @@ module.exports = class {
   }
 
   validateBranchHasIssueId() {
+    console.log("Branch: " + this.githubEvent.head);
     return (
       this.githubEvent.head &&
       this.validateStringHasIssueId(this.githubEvent.head.ref)
