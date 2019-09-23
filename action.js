@@ -19,11 +19,11 @@ module.exports = class {
   }
 
   validateTitleHasIssueId() {
-    return validateStringHasIssueId(this.githubEvent.pull_request.title);
+    return this.validateStringHasIssueId(this.githubEvent.pull_request.title);
   }
 
   validateBranchHasIssueId() {
-    return validateStringHasIssueId(this.githubEvent.head.ref);
+    return this.validateStringHasIssueId(this.githubEvent.head.ref);
   }
 
   async validateCommitsHaveIssueIds() {
@@ -38,7 +38,7 @@ module.exports = class {
       .filter(commit => !commit.message.startsWith(masterMergeStart))
       .filter(commit => !commit.message.startsWith(originMergeStart))
       .forEach(commit => {
-        if (!validateStringHasIssueId(commit.message)) {
+        if (!this.validateStringHasIssueId(commit.message)) {
           return false;
         }
       });
