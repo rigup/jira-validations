@@ -1,7 +1,7 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
-const jira = require("./common/net/jira");
-const action = require("./action");
+const Jira = require("./common/net/jira");
+const Action = require("./action");
 
 try {
   if (!process.env.JIRA_BASE_URL)
@@ -11,11 +11,13 @@ try {
   if (!process.env.JIRA_USER_EMAIL)
     throw new Error("Please specify JIRA_USER_EMAIL env");
 
-  // `verify-from` input defined in action metadata file
+  // `verify-from` input defined in action.yml
   const verifyFromInput = core.getInput("verify-from");
   console.log(`Verifying Issue ID from ${verifyFromInput}`);
 
-  const { eventName, payload } = github.context;
+  // `fail-invalid` input defined in action.yml
+  const failInvalidInput = core.getInput("fail-invalid");
+  console.log(`Verifying Issue ID from ${failInvalidInput}`);
 
   const config = {
     baseUrl: process.env.JIRA_BASE_URL,
@@ -23,20 +25,25 @@ try {
     email: process.env.JIRA_USER_EMAIL
   };
 
-  this.jira = new jira(config);
-  this.action = new action(payload, this.jira);
+  const jira = new Jira(config);
+  const action = new Action({ github, jira });
+  const valid = await action.validate(verifyFromInput);
 
-  switch (verifyFromInput) {
-    case "all":
-      break;
-    case "commits":
-      break;
-    case "branch":
-    default:
+  if (!valid && failInvalidInput === "true") {
+    core.setFailed("Validation Failed!");
   }
 
-  core.setOutput("verified", true);
-  console.log(`The context: ${JSON.stringify(github.context)}`);
+  if (!valid && failInvalidInput === "checks") {
+    console.log(`TODO: Send GitHub Check`);
+  }
+
+  if (!valid && failInvalidInput === "false") {
+    core.setNeutral();
+  }
+
+  core.setOutput("verified", valid);
+
+  console.log(`The context: ${JSON.stringify(github.context, null, 2)}`);
 } catch (error) {
   core.setFailed(error.message);
 }

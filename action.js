@@ -1,15 +1,36 @@
-const _ = require("lodash");
-
 const JIRA_IDENTIFIER = /[A-Z]+-\d+/g;
 
 module.exports = class {
-  constructor({ githubEvent, jira }) {
+  constructor({ github, jira }) {
+    this.githubEvent = github.context.githubEvent;
+    this.eventName = github.context.eventName;
     this.Jira = jira;
-    this.githubEvent = githubEvent;
-    this.issueIds = [];
+    this.valid = false;
+    this.issueIds = new Set();
   }
 
-  validateCommitsHaveIssueIds() {
+  validateStringHasIssueId(input) {
+    const matcher = input.match(JIRA_IDENTIFIER);
+    if (matcher === null) return false;
+
+    console.log({ input, matcher });
+    this.issueIds.push(matcher);
+    return true;
+  }
+
+  validateTitleHasIssueId() {
+    return validateStringHasIssueId(this.githubEvent.pull_request.title);
+  }
+
+  validateBranchHasIssueId() {
+    return validateStringHasIssueId(this.githubEvent.head.ref);
+  }
+
+  async validateCommitsHaveIssueIds() {
+    if (this.eventName === "push" && this.githubEvent.base.ref === "master")
+      return true;
+    else this.githubEvent.commits = await getCommits();
+
     const masterMergeStart = "Merge branch 'master'";
     const originMergeStart = "Merge remote-tracking branch 'origin/master'";
 
@@ -17,8 +38,7 @@ module.exports = class {
       .filter(commit => !commit.message.startsWith(masterMergeStart))
       .filter(commit => !commit.message.startsWith(originMergeStart))
       .forEach(commit => {
-        const matcher = commit.message.match(JIRA_IDENTIFIER);
-        if (matcher === null) {
+        if (!validateStringHasIssueId(commit.message)) {
           return false;
         }
       });
@@ -26,16 +46,38 @@ module.exports = class {
     return true;
   }
 
-  async execute() {
-    const match = extractString.match(issueIdRegEx);
-
-    if (!match) {
-      console.log(`String "${extractString}" does not contain issueKeys`);
-
-      return;
+  async validate(type) {
+    let _valid = false;
+    switch (type) {
+      case "all":
+        _valid =
+          (await validateCommitsHaveIssueIds()) && validateBranchHasIssueId();
+        break;
+      case "commits":
+        _valid = await validateCommitsHaveIssueIds();
+        break;
+      case "branch":
+      default:
+        _valid = validateBranchHasIssueId();
     }
 
-    for (const issueKey of match) {
+    if (!_valid) return false;
+
+    const issues = await this.getIssues();
+    return issues && issues.hasOwnProperty("issue");
+  }
+
+  async getCommits() {
+    const { data } = await github.Github.listCommitsOnPullRequest({
+      repo: this.githubEvent.pull_request.repository.name,
+      pullNumber: this.githubEvent.pull_request.number
+    });
+
+    return data;
+  }
+
+  async getIssues() {
+    for (const issueKey of this.issueIds) {
       const issue = await this.Jira.getIssue(issueKey);
 
       if (issue) {
