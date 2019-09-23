@@ -14,9 +14,9 @@ try {
   const verifyFrom = core.getInput("verify-from");
   console.log(`Verifying Issue ID from ${verifyFrom}`);
 
-  // `verify-from` input defined in action metadata file
-  const verifyFrom = core.getInput("verify-from");
-  console.log(`Verifying Issue ID from ${verifyFrom}`);
+  // `fail-invalid` input defined in action metadata file
+  const failInvalid = core.getInput("fail-invalid");
+  console.log(`Fail Invalid? ${failInvalid}`);
 
   // Get the JSON webhook payload for the event that triggered the workflow
   const payload = JSON.stringify(github.context.payload, undefined, 2);

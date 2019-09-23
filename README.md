@@ -10,7 +10,7 @@ This action prints verfied 'true' or 'false' if the github event contains a vali
 
 ### `fail-invalid`
 
-**Required** Can be `'true'`, `'false'` or `'checks'`. Default `'checks'`.
+**Required** Can be `true`, `false` or `'checks'`. Default `'checks'`.
 
 `'checks'` Will send a successful / failed github check
 
