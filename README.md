@@ -18,7 +18,7 @@ If false, will fail a GitHub Check if Validation fails, otherwise all checks wil
 
 **Required** Comma separated list of allowed Issue Types. If the matching issue type isn't in this list, validation fails.
 
-Default `"Task,Standalone Task,Bug"`
+Defaults to `"Task,Standalone Task,Bug"`
 
 ## Outputs
 
