@@ -1,10 +1,12 @@
 const JIRA_IDENTIFIER = /[A-Z]+-\d+/g;
+const GITHUB_OWNER = "rigup";
 
 module.exports = class {
   constructor({ github, jira }) {
     this.githubEvent = github.context.payload;
     this.eventName = github.context.eventName;
     this.Jira = jira;
+    this.github = github;
     this.valid = false;
     this.issueIds = new Set();
   }
@@ -32,21 +34,34 @@ module.exports = class {
 
   // TODO - Test this
   async validateCommitsHaveIssueIds() {
-    if (
-      this.eventName === "push" &&
-      this.githubEvent.pull_request.base.ref === "master"
-    )
-      return true;
-    else this.githubEvent.commits = await getCommits();
+    this.githubEvent.commits = await this.getCommits();
 
-    const masterMergeStart = "Merge branch 'master'";
-    const originMergeStart = "Merge remote-tracking branch 'origin/master'";
+    const masterMergeStart = [
+      "Merge branch 'master'",
+      `Merged master into ${this.head.ref}`
+    ];
+    const originMergeStart = [
+      "Merge remote-tracking branch 'origin/master'",
+      `Merge remote-tracking branch '${this.head.ref}'`
+    ];
+    const conflictResolutionStart = [
+      `Merge branch '${this.head.ref}' of github.com:rigup/${this.repository.name}`
+    ];
+    const filterMatches = [
+      ...masterMergeStart,
+      ...originMergeStart,
+      ...conflictResolutionStart
+    ];
 
     this.githubEvent.commits
-      .filter(commit => !commit.message.startsWith(masterMergeStart))
-      .filter(commit => !commit.message.startsWith(originMergeStart))
+      .filter(commit => {
+        const commitMessage = commit.commit.message;
+        return !filterMatches.some(matcher =>
+          commitMessage.startsWith(matcher)
+        );
+      })
       .forEach(commit => {
-        if (!this.validateStringHasIssueId(commit.message)) {
+        if (!this.validateStringHasIssueId(commit.commit.message)) {
           return false;
         }
       });
@@ -73,27 +88,37 @@ module.exports = class {
     if (!_valid) return false;
 
     const issues = await this.getIssues();
+    console.log({ issues });
     return issues && issues.hasOwnProperty("issue");
   }
 
-  // TODO - Test this
   async getCommits() {
-    const { data } = await github.Github.listCommitsOnPullRequest({
-      repo: this.githubEvent.pull_request.repository.name,
-      pullNumber: this.githubEvent.number
-    });
+    try {
+      const { data } = await this.github.Github.pulls.listCommits({
+        owner: GITHUB_OWNER,
+        repo: this.githubEvent.pull_request.repository.name,
+        pull_number: this.githubEvent.number
+      });
 
-    return data;
+      return data;
+    } catch (e) {
+      console.error({ e });
+      return [];
+    }
   }
 
   // TODO - Test this
   async getIssues() {
-    for (const issueKey of this.issueIds) {
-      const issue = await this.Jira.getIssue(issueKey);
+    try {
+      for (const issueKey of this.issueIds) {
+        const issue = await this.Jira.getIssue(issueKey);
 
-      if (issue) {
-        return { issue: issue.key };
+        if (issue) {
+          return { issue: issue.key };
+        }
       }
+    } catch (error) {
+      console.error({ error });
     }
   }
 };
