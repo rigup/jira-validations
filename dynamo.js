@@ -16,7 +16,7 @@ module.exports = class {
   async findBy(attr, value) {
     return this.dynamo
       .query(PEOPLE_TABLE_NAME, `${attr}-index`, `${attr} = :v1`, {
-        ":v1": githubId
+        ":v1": value
       })
       .then(results => {
         if (results.count === 1) {
