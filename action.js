@@ -109,7 +109,7 @@ module.exports = class {
       return data;
     } catch (e) {
       console.error({ e });
-      return [];
+      throw e;
     }
   }
 
