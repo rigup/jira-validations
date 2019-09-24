@@ -19,7 +19,6 @@ const Action = require("./action");
     // `fail-invalid` input defined in action.yml
     const failInvalidInput = core.getInput("fail-invalid");
     console.log(`Fail Invalid? ${failInvalidInput}`);
-
     console.log(`The context: ${JSON.stringify(github.GitHub, null, 2)}`);
 
     const config = {
