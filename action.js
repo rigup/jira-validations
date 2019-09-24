@@ -119,6 +119,7 @@ module.exports = class {
         const issue = await this.Jira.getIssue(issueKey);
 
         if (issue) {
+          console.log(JSON.stringify(issue));
           return { issue: issue.key };
         }
       }
