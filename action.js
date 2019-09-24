@@ -36,14 +36,14 @@ module.exports = class {
 
     const masterMergeStart = [
       "Merge branch 'master'",
-      `Merged master into ${this.head.ref}`
+      `Merged master into ${this.githubEvent.pull_request.head.ref}`
     ];
     const originMergeStart = [
       "Merge remote-tracking branch 'origin/master'",
-      `Merge remote-tracking branch '${this.head.ref}'`
+      `Merge remote-tracking branch '${this.githubEvent.pull_request.head.ref}'`
     ];
     const conflictResolutionStart = [
-      `Merge branch '${this.head.ref}' of github.com:rigup/${this.repository.name}`
+      `Merge branch '${this.githubEvent.pull_request.head.ref}' of github.com:rigup/${this.githubEvent.repository.name}`
     ];
     const filterMatches = [
       ...masterMergeStart,
