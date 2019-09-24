@@ -60,9 +60,11 @@ const Action = require("./action");
     }
 
     const reviewers = action.getCodeReviewers();
-    const rigupReviewers = reviewers.map(async reviewer => {
-      return await dynamo.findByGithubId(reviewer.id);
-    });
+    const rigupReviewers = await Promise.all(
+      reviewers.map(async reviewer => {
+        return await dynamo.findByGithubId(reviewer.id);
+      })
+    );
 
     console.log({ rigupReviewers });
 
