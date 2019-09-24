@@ -104,6 +104,7 @@ module.exports = class {
       return false;
     }
 
+    console.log(`Issue Type - ${issue.fields.issuetype.name}`);
     return true;
   }
 
