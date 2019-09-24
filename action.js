@@ -33,9 +33,6 @@ module.exports = class {
 
   async validateCommitsHaveIssueIds() {
     const commits = await this.getCommits();
-
-    console.log(JSON.stringify(commits));
-
     const masterMergeStart = [
       "Merge branch 'master'",
       `Merged master into ${this.githubEvent.pull_request.head.ref}`
@@ -62,7 +59,9 @@ module.exports = class {
         );
       })
       .forEach(commit => {
+        console.log(commit.commit.message);
         if (!this.validateStringHasIssueId(commit.commit.message)) {
+          console.log("false");
           return false;
         }
       });
