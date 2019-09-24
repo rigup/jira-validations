@@ -53,13 +53,14 @@ module.exports = class {
 
     commits
       .filter(commit => {
-        const commitMessage = commit.commit.message;
+        const commitMessage = commit.message;
+        console.log({ commitMessage });
         return !filterMatches.some(matcher =>
           commitMessage.startsWith(matcher)
         );
       })
       .forEach(commit => {
-        if (!this.validateStringHasIssueId(commit.commit.message)) {
+        if (!this.validateStringHasIssueId(commit.message)) {
           return false;
         }
       });
@@ -102,7 +103,6 @@ module.exports = class {
         repo: this.githubEvent.repository.name,
         pull_number: this.githubEvent.number
       });
-      console.log(JSON.stringify(data.commit));
       return data;
     } catch (e) {
       console.error({ e });
