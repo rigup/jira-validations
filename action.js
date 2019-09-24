@@ -55,15 +55,15 @@ module.exports = class {
     commits
       .filter(commit => {
         const commitMessage = commit.commit.message;
-        console.log({ commitMessage });
         return !filterMatches.some(matcher =>
           commitMessage.startsWith(matcher)
         );
       })
       .forEach(commit => {
-        console.log(commit.commit.message);
         if (!this.validateStringHasIssueId(commit.commit.message)) {
-          console.log("false");
+          console.error(
+            `Commit message ${commit.commit.message} doesn't have a valid Jira Issue`
+          );
           valid = false;
         }
       });
@@ -81,7 +81,6 @@ module.exports = class {
         break;
       case "commits":
         _valid = await this.validateCommitsHaveIssueIds();
-        console.log({ _valid });
         break;
       case "branch":
       default:
