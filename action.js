@@ -102,7 +102,7 @@ module.exports = class {
         repo: this.githubEvent.repository.name,
         pull_number: this.githubEvent.number
       });
-      console.log({ data });
+      console.log(JSON.stringify(data.commit));
       return data;
     } catch (e) {
       console.error({ e });
