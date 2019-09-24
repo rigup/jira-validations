@@ -12,6 +12,9 @@ const Action = require("./action");
     if (!process.env.JIRA_USER_EMAIL)
       throw new Error("Please specify JIRA_USER_EMAIL env");
 
+    const githubToken = core.getInput("github-token");
+    if (!githubToken) throw new Error("Please specify 'github-token' input");
+
     // `verify-from` input defined in action.yml
     const verifyFromInput = core.getInput("verify-from");
     console.log(`Verifying Issue ID from ${verifyFromInput}`);
@@ -19,7 +22,6 @@ const Action = require("./action");
     // `fail-invalid` input defined in action.yml
     const failInvalidInput = core.getInput("fail-invalid");
     console.log(`Fail Invalid? ${failInvalidInput}`);
-    console.log(`The context: ${JSON.stringify(github.GitHub, null, 2)}`);
 
     const config = {
       baseUrl: process.env.JIRA_BASE_URL,
@@ -28,9 +30,11 @@ const Action = require("./action");
     };
 
     const jira = new Jira(config);
-    const action = new Action({ github, jira });
-    const valid = await action.validate(verifyFromInput);
+    const octokit = new github.GitHub(githubToken);
+    const context = github.context;
+    const action = new Action({ context, jira, octokit });
 
+    const valid = await action.validate(verifyFromInput);
     console.log({ valid });
 
     if (!valid && failInvalidInput === "true") {

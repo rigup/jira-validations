@@ -2,12 +2,11 @@ const JIRA_IDENTIFIER = /[A-Z]+-\d+/g;
 const GITHUB_OWNER = "rigup";
 
 module.exports = class {
-  constructor({ github, jira }) {
-    this.githubEvent = github.context.payload;
-    this.eventName = github.context.eventName;
+  constructor({ context, jira, octokit }) {
+    this.githubEvent = context.payload;
+    this.eventName = context.eventName;
     this.Jira = jira;
-    this.github = github;
-    this.valid = false;
+    this.octkit = octokit;
     this.issueIds = new Set();
   }
 
@@ -32,9 +31,8 @@ module.exports = class {
     );
   }
 
-  // TODO - Test this
   async validateCommitsHaveIssueIds() {
-    this.githubEvent.commits = await this.getCommits();
+    const commits = await this.getCommits();
 
     const masterMergeStart = [
       "Merge branch 'master'",
@@ -53,7 +51,7 @@ module.exports = class {
       ...conflictResolutionStart
     ];
 
-    this.githubEvent.commits
+    commits
       .filter(commit => {
         const commitMessage = commit.commit.message;
         return !filterMatches.some(matcher =>
@@ -94,7 +92,7 @@ module.exports = class {
 
   async getCommits() {
     try {
-      const { data } = await this.github.Github.pulls.listCommits({
+      const { data } = await this.octkit.pulls.listCommits({
         owner: GITHUB_OWNER,
         repo: this.githubEvent.pull_request.repository.name,
         pull_number: this.githubEvent.number
