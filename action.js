@@ -33,23 +33,24 @@ module.exports = class {
 
   async validateCommitsHaveIssueIds() {
     const commits = await this.getCommits();
-
     const masterMergeStart = [
       "Merge branch 'master'",
-      `Merged master into ${this.head.ref}`
+      `Merged master into ${this.githubEvent.pull_request.head.ref}`
     ];
     const originMergeStart = [
       "Merge remote-tracking branch 'origin/master'",
-      `Merge remote-tracking branch '${this.head.ref}'`
+      `Merge remote-tracking branch '${this.githubEvent.pull_request.head.ref}'`
     ];
     const conflictResolutionStart = [
-      `Merge branch '${this.head.ref}' of github.com:rigup/${this.repository.name}`
+      `Merge branch '${this.githubEvent.pull_request.head.ref}' of github.com:rigup/${this.githubEvent.repository.name}`
     ];
     const filterMatches = [
       ...masterMergeStart,
       ...originMergeStart,
       ...conflictResolutionStart
     ];
+
+    let valid = true;
 
     commits
       .filter(commit => {
@@ -60,11 +61,14 @@ module.exports = class {
       })
       .forEach(commit => {
         if (!this.validateStringHasIssueId(commit.commit.message)) {
-          return false;
+          console.error(
+            `Commit message '${commit.commit.message}' doesn't have a valid Jira Issue`
+          );
+          valid = false;
         }
       });
 
-    return true;
+    return valid;
   }
 
   async validate(type) {
@@ -91,13 +95,17 @@ module.exports = class {
   }
 
   async getCommits() {
+    console.log({
+      repo: this.githubEvent.repository.name,
+      pull_number: this.githubEvent.number
+    });
+
     try {
       const { data } = await this.octkit.pulls.listCommits({
         owner: GITHUB_OWNER,
-        repo: this.githubEvent.pull_request.repository.name,
+        repo: this.githubEvent.repository.name,
         pull_number: this.githubEvent.number
       });
-
       return data;
     } catch (e) {
       console.error({ e });
