@@ -66,7 +66,7 @@ const Action = require("./action");
       })
     );
 
-    console.log({ rigupReviewers });
+    console.log(JSON.stringify(rigupReviewers));
 
     core.setOutput("verified", `${valid}`);
   } catch (error) {
