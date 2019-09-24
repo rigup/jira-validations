@@ -108,6 +108,13 @@ module.exports = class {
     return true;
   }
 
+  getCodeReviewers() {
+    return this.githubEvent.pull_request.requested_reviewers.map(rev => ({
+      login: rev.login,
+      id: rev.id
+    }));
+  }
+
   async getCommits() {
     console.log({
       repo: this.githubEvent.repository.name,

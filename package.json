@@ -12,6 +12,7 @@
   "dependencies": {
     "@actions/core": "^1.1.1",
     "@actions/github": "^1.1.0",
+    "aws-sdk": "^2.535.0",
     "lodash": "^4.17.15",
     "node-fetch": "^2.6.0",
     "url": "^0.11.0"

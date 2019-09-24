@@ -1,5 +1,6 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
+const Dynamo = require("./dynamo");
 const Jira = require("./common/net/jira");
 const Action = require("./action");
 
@@ -11,6 +12,8 @@ const Action = require("./action");
       throw new Error("Please specify JIRA_API_TOKEN env");
     if (!process.env.JIRA_USER_EMAIL)
       throw new Error("Please specify JIRA_USER_EMAIL env");
+    if (!process.env.PEOPLE_TABLE_NAME)
+      throw new Error("Please specify PEOPLE_TABLE_NAME env");
 
     const githubToken = core.getInput("github-token");
     if (!githubToken) throw new Error("Please specify 'github-token' input");
@@ -38,6 +41,7 @@ const Action = require("./action");
     };
 
     const jira = new Jira(config);
+    const dynamo = new Dynamo();
     const octokit = new github.GitHub(githubToken);
     const context = github.context;
     const action = new Action({ context, jira, octokit });
@@ -54,6 +58,13 @@ const Action = require("./action");
     if (!valid && failInvalidInput === "checks") {
       console.log(`TODO: Send GitHub Check`);
     }
+
+    const reviewers = action.getCodeReviewers();
+    const rigupEngineers = reviewers.map(async reviewer => {
+      return await dynamo.findByGithubId(reviewer.id);
+    });
+
+    console.log({ rigupEngineers });
 
     core.setOutput("verified", `${valid}`);
   } catch (error) {
