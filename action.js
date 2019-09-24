@@ -50,7 +50,6 @@ module.exports = class {
       ...conflictResolutionStart
     ];
 
-
     let valid = true;
 
     commits
@@ -66,7 +65,6 @@ module.exports = class {
         if (!this.validateStringHasIssueId(commit.commit.message)) {
           console.log("false");
           valid = false;
-          break;
         }
       });
 
