@@ -55,14 +55,14 @@ module.exports = class {
 
     commits
       .filter(commit => {
-        const commitMessage = commit.message;
+        const commitMessage = commit.commit.message;
         console.log({ commitMessage });
         return !filterMatches.some(matcher =>
           commitMessage.startsWith(matcher)
         );
       })
       .forEach(commit => {
-        if (!this.validateStringHasIssueId(commit.message)) {
+        if (!this.validateStringHasIssueId(commit.commit.message)) {
           return false;
         }
       });
