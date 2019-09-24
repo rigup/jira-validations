@@ -50,6 +50,9 @@ module.exports = class {
       ...conflictResolutionStart
     ];
 
+
+    let valid = true;
+
     commits
       .filter(commit => {
         const commitMessage = commit.commit.message;
@@ -62,11 +65,12 @@ module.exports = class {
         console.log(commit.commit.message);
         if (!this.validateStringHasIssueId(commit.commit.message)) {
           console.log("false");
-          return false;
+          valid = false;
+          break;
         }
       });
 
-    return true;
+    return valid;
   }
 
   async validate(type) {
