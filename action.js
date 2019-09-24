@@ -91,13 +91,18 @@ module.exports = class {
   }
 
   async getCommits() {
+    console.log({
+      repo: this.githubEvent.repository.name,
+      pull_number: this.githubEvent.number
+    });
+
     try {
       const { data } = await this.octkit.pulls.listCommits({
         owner: GITHUB_OWNER,
         repo: this.githubEvent.repository.name,
         pull_number: this.githubEvent.number
       });
-
+      console.log({ data });
       return data;
     } catch (e) {
       console.error({ e });
