@@ -20,6 +20,8 @@ const Action = require("./action");
     const failInvalidInput = core.getInput("fail-invalid");
     console.log(`Fail Invalid? ${failInvalidInput}`);
 
+    console.log(`The context: ${JSON.stringify(github.GitHub, null, 2)}`);
+
     const config = {
       baseUrl: process.env.JIRA_BASE_URL,
       token: process.env.JIRA_API_TOKEN,
@@ -41,8 +43,6 @@ const Action = require("./action");
     }
 
     core.setOutput("verified", `${valid}`);
-
-    console.log(`The context: ${JSON.stringify(github.context, null, 2)}`);
   } catch (error) {
     core.setFailed(error.message);
   }
