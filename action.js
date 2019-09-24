@@ -94,7 +94,7 @@ module.exports = class {
     try {
       const { data } = await this.octkit.pulls.listCommits({
         owner: GITHUB_OWNER,
-        repo: this.githubEvent.pull_request.repository.name,
+        repo: this.githubEvent.repository.name,
         pull_number: this.githubEvent.number
       });
 
