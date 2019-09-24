@@ -38,11 +38,11 @@ jobs:
         with:
           verify-from: "branch"
           fail-invalid: "true"
+          github-token: ${{ secrets.GITHUB_TOKEN }} # Passed in from Github, no need to setup
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Use the output from the `jira` step
       - name: Get the output

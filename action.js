@@ -62,7 +62,7 @@ module.exports = class {
       .forEach(commit => {
         if (!this.validateStringHasIssueId(commit.commit.message)) {
           console.error(
-            `Commit message ${commit.commit.message} doesn't have a valid Jira Issue`
+            `Commit message '${commit.commit.message}' doesn't have a valid Jira Issue`
           );
           valid = false;
         }
