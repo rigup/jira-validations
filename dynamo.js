@@ -14,7 +14,7 @@ module.exports = class {
   }
 
   async findBy(attr, value) {
-    return dynamo
+    return this.dynamo
       .query(PEOPLE_TABLE_NAME, `${attr}-index`, `${attr} = :v1`, {
         ":v1": githubId
       })
