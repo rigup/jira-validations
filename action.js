@@ -79,6 +79,7 @@ module.exports = class {
         break;
       case "commits":
         _valid = await this.validateCommitsHaveIssueIds();
+        console.log({ _valid });
         break;
       case "branch":
       default:
