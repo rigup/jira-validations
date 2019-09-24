@@ -10,7 +10,7 @@ module.exports = class {
   }
 
   async findByGithubId(githubId) {
-    return findBy("githubId", githubId);
+    return await this.findBy("githubId", githubId);
   }
 
   async findBy(attr, value) {
