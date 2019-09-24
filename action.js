@@ -90,7 +90,10 @@ module.exports = class {
     if (!_valid) return false;
 
     const { issue } = await this.getIssues();
-    console.log({ issue });
+
+    if (!issue || !issue.hasOwnProperty("key")) {
+      return false;
+    }
 
     if (validIssueTypes.indexOf(issue.fields.issuetype.name) === -1) {
       console.error(
@@ -101,7 +104,7 @@ module.exports = class {
       return false;
     }
 
-    return issue && issue.hasOwnProperty("key");
+    return true;
   }
 
   async getCommits() {
@@ -124,18 +127,12 @@ module.exports = class {
   }
 
   async getIssues() {
-    try {
-      for (const issueKey of this.issueIds) {
-        const issue = await this.Jira.getIssue(issueKey);
+    for (const issueKey of this.issueIds) {
+      const issue = await this.Jira.getIssue(issueKey);
 
-        if (issue) {
-          console.log(JSON.stringify(issue));
-          return { issue };
-        }
+      if (issue) {
+        return { issue };
       }
-    } catch (error) {
-      console.error({ error });
-      throw e;
     }
   }
 };
