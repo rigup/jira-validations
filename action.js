@@ -34,6 +34,8 @@ module.exports = class {
   async validateCommitsHaveIssueIds() {
     const commits = await this.getCommits();
 
+    console.log(JSON.stringify(commits));
+
     const masterMergeStart = [
       "Merge branch 'master'",
       `Merged master into ${this.githubEvent.pull_request.head.ref}`
