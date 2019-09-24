@@ -60,11 +60,11 @@ const Action = require("./action");
     }
 
     const reviewers = action.getCodeReviewers();
-    const rigupEngineers = reviewers.map(async reviewer => {
+    const rigupReviewers = reviewers.map(async reviewer => {
       return await dynamo.findByGithubId(reviewer.id);
     });
 
-    console.log({ rigupEngineers });
+    console.log({ rigupReviewers });
 
     core.setOutput("verified", `${valid}`);
   } catch (error) {
