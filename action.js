@@ -107,13 +107,12 @@ module.exports = class {
         pull_number: this.githubEvent.number
       });
       return data;
-    } catch (e) {
-      console.error({ e });
+    } catch (error) {
+      console.error({ error });
       throw e;
     }
   }
 
-  // TODO - Test this
   async getIssues() {
     try {
       for (const issueKey of this.issueIds) {
@@ -125,6 +124,7 @@ module.exports = class {
       }
     } catch (error) {
       console.error({ error });
+      throw e;
     }
   }
 };
