@@ -101,7 +101,7 @@ module.exports = class {
       return false;
     }
 
-    return issues && issues.hasOwnProperty("issue");
+    return issue && issue.hasOwnProperty("key");
   }
 
   async getCommits() {
