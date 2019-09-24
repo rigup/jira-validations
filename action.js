@@ -71,7 +71,7 @@ module.exports = class {
     return valid;
   }
 
-  async validate(type) {
+  async validate(type, validIssueTypes) {
     let _valid = false;
     switch (type) {
       case "all":
@@ -89,8 +89,18 @@ module.exports = class {
 
     if (!_valid) return false;
 
-    const issues = await this.getIssues();
-    console.log({ issues });
+    const { issue } = await this.getIssues();
+    console.log({ issue });
+
+    if (validIssueTypes.indexOf(issue.fields.issuetype.name) === -1) {
+      console.error(
+        `Issue type ${
+          issue.fields.issuetype.name
+        } is not one of '${JSON.stringify(validIssueTypes)}'`
+      );
+      return false;
+    }
+
     return issues && issues.hasOwnProperty("issue");
   }
 
@@ -120,7 +130,7 @@ module.exports = class {
 
         if (issue) {
           console.log(JSON.stringify(issue));
-          return { issue: issue.key };
+          return { issue };
         }
       }
     } catch (error) {

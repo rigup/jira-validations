@@ -9,6 +9,10 @@ inputs:
     description: "Describe how to fail if we have an invalid Jira ID. Can be 'true', 'false' or 'checks'"
     required: true
     default: "true"
+  allowed-issue-types: # id of input
+    description: "Allowed Issue Types, comma separated, can be 'Task,Standalone Task,Bug'"
+    required: true
+    default: "Task,Standalone Task,Bug"
 outputs:
   verified: # id of output
     description: "Will be 'true' if it passed all checks, 'false' otherwise"

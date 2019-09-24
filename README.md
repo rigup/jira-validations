@@ -14,6 +14,12 @@ This action prints verfied 'true' or 'false' if the github event contains a vali
 
 If false, will fail a GitHub Check if Validation fails, otherwise all checks will pass.
 
+### `allowed-issue-types`
+
+**Required** Comma separated list of allowed Issue Types. If the matching issue type isn't in this list, validation fails.
+
+Default `"Task,Standalone Task,Bug"`
+
 ## Outputs
 
 ### `verified`
@@ -38,6 +44,7 @@ jobs:
         with:
           verify-from: "branch"
           fail-invalid: "true"
+          allowed-issue-types: "Task,Standalone Task,Bug"
           github-token: ${{ secrets.GITHUB_TOKEN }} # Passed in from Github, no need to setup
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}

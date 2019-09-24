@@ -13,6 +13,7 @@ jobs:
         with:
           verify-from: "all"
           fail-invalid: "true"
+          allowed-issue-types: "Task,Standalone Task,Bug"
           github-token: ${{ secrets.GITHUB_TOKEN }}
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}

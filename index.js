@@ -17,11 +17,19 @@ const Action = require("./action");
 
     // `verify-from` input defined in action.yml
     const verifyFromInput = core.getInput("verify-from");
-    console.log(`Verifying Issue ID from ${verifyFromInput}`);
+    console.log(`Verifying Issue ID from '${verifyFromInput}'`);
 
     // `fail-invalid` input defined in action.yml
     const failInvalidInput = core.getInput("fail-invalid");
     console.log(`Fail Invalid? ${failInvalidInput}`);
+
+    // `allowed-issue-types` input defined in action.yml
+    const allowedIssueTypesInput = core
+      .getInput("allowed-issue-types")
+      .split(",");
+    console.log(
+      `Allowed Issue Types - ${JSON.stringify(allowedIssueTypesInput)}`
+    );
 
     const config = {
       baseUrl: process.env.JIRA_BASE_URL,
@@ -34,7 +42,10 @@ const Action = require("./action");
     const context = github.context;
     const action = new Action({ context, jira, octokit });
 
-    const valid = await action.validate(verifyFromInput);
+    const valid = await action.validate(
+      verifyFromInput,
+      allowedIssueTypesInput
+    );
 
     if (!valid && failInvalidInput === "true") {
       core.setFailed("Validation Failed!");
