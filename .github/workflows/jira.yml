@@ -14,8 +14,8 @@ jobs:
           verify-from: "all"
           fail-invalid: "true"
           allowed-issue-types: "Task,Standalone Task,Bug"
-          github-token: ${{ secrets.GITHUB_TOKEN }}
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
