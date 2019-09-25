@@ -10,9 +10,7 @@ const Jira = require('./lib/jira');
     if (!process.env.JIRA_API_TOKEN) throw new Error('Please specify JIRA_API_TOKEN env');
     if (!process.env.JIRA_USER_EMAIL) throw new Error('Please specify JIRA_USER_EMAIL env');
     if (!process.env.PEOPLE_TABLE_NAME) throw new Error('Please specify PEOPLE_TABLE_NAME env');
-
-    const githubToken = core.getInput('github-token');
-    if (!githubToken) throw new Error("Please specify 'github-token' input");
+    if (!process.env.GITHUB_TOKEN) throw new Error('Please specify GITHUB_TOKEN env');
 
     // `verify-from` input defined in action.yml
     const verifyFromInput = core.getInput('verify-from');
@@ -34,6 +32,7 @@ const Jira = require('./lib/jira');
 
     const jira = new Jira(config);
     const dynamo = new Dynamo();
+    const githubToken = process.env.GITHUB_TOKEN;
     const octokit = new github.GitHub(githubToken);
     const { context } = github;
     const action = new Action({ context, jira, octokit });
@@ -44,10 +43,6 @@ const Jira = require('./lib/jira');
       core.setFailed('Validation Failed!');
     }
 
-    if (!valid && failInvalidInput === 'checks') {
-      console.log(`TODO: Send GitHub Check`);
-    }
-
     const reviewers = action.getCodeReviewers();
     const rigupReviewers = await Promise.all(
       reviewers.map(async (reviewer) => {
@@ -55,7 +50,17 @@ const Jira = require('./lib/jira');
       })
     );
 
-    console.log(JSON.stringify(rigupReviewers));
+    const jiraAccountIds = rigupReviewers.map((rev) => rev.Items[0].bitbucketId);
+    const jiraUsers = await jira.getUsersFromAccountIds(jiraAccountIds);
+
+    if (jiraUsers) {
+      console.log(
+        `Adding Jira Users as Code Reviewers: ${JSON.stringify(
+          jiraUsers.map((user) => user.displayName)
+        )}`
+      );
+      jira.addCodeReviewersToIssue(action.issue.key, jiraUsers);
+    }
 
     core.setOutput('verified', `${valid}`);
   } catch (error) {

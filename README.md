@@ -47,7 +47,6 @@ jobs:
           verify-from: "branch"
           fail-invalid: "true"
           allowed-issue-types: "Task,Standalone Task,Bug"
-          github-token: ${{ secrets.GITHUB_TOKEN }} # Passed in from Github, no need to setup
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
@@ -55,6 +54,7 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Use the output from the `jira` step
       - name: Get the output
@@ -72,21 +72,13 @@ jobs:
 npm install
 ```
 
+Copy `.env.sample` to `.env` and fill out fields.
+
 Install `@zeit/ncc`
 
 ```
 npm i -g @zeit/ncc
 ```
-
-Compile the `index.js` file.
-
-```
-ncc build index.js
-```
-
-You'll see a new dist/index.js file with your code and the compiled modules.
-
-main keywork in `action.yml` points to `dist/index.js`
 
 ### Testing
 
@@ -99,3 +91,15 @@ npm run test
 This action uses itself!
 
 So you'll need a valid branch name with Jira issue key, as well as all commit messages will need a Jira Issue Key :)
+
+Compile the `index.js` file.
+
+```
+ncc build index.js
+```
+
+You'll see a new dist/index.js file with your code and the compiled modules.
+
+main keywork in `action.yml` points to `dist/index.js`
+
+Commit the newly updated `dist/index.js` file and push.
