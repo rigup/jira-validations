@@ -1,0 +1,68 @@
+#!/usr/bin/env ruby
+
+type_path = File.dirname(ARGV[0]) + '/COMMIT_TYPE'
+commit_type = File.read(type_path).strip if File.exist?(type_path)
+message = File.read(ARGV[0])
+
+if commit_type == 'message'
+  exit 0 if message.strip.empty?
+elsif commit_type == 'merge'
+  exit 0
+else
+  comment_char = `git config core.commentChar`.strip
+  comment_char = '#' if comment_char.empty?
+  after_scissor = false
+  message_empty = message.split("\n").map(&:strip).all? do |line|
+    if line == "#{comment_char} ------------------------ >8 ------------------------"
+      after_scissor = true
+    end
+
+    after_scissor || line.empty? || line[0] == comment_char
+  end
+
+  exit 0 if message_empty
+end
+
+branch_name = `git rev-parse --abbrev-ref HEAD`
+
+jira_pattern = /[A-Z]+-\d+/i
+jira_branch_match = jira_pattern.match(branch_name)
+
+tp_branch_pattern = /^(issue)?(\d+)(?:-.+)?$/i
+tp_msg_pattern = /(#|id:)(\d+)/
+tp_branch_match = tp_branch_pattern.match(branch_name)
+
+if jira_branch_match
+  branch_issue = jira_branch_match[0].upcase
+  commit_match = jira_pattern.match(message)
+
+  if !commit_match
+    File.open(ARGV[0], 'w') do |file|
+      file.puts(branch_issue + ": " + message)
+    end
+  else
+    commit_issue = commit_match[0].upcase
+
+    if commit_issue != branch_issue
+      puts "\e[33mWARNING: Your branch refers to #{branch_issue} but your commit message refers to #{commit_issue}. Did you make a typo?\e[0m"
+    end
+  end
+elsif tp_branch_match
+  branch_issue = tp_branch_match[2]
+  commit_match = tp_msg_pattern.match(message)
+
+  if !commit_match
+    File.open(ARGV[0], 'w') do |file|
+      file.puts("id:#{branch_issue} #{message}")
+    end
+  else
+    commit_issue = commit_match[2]
+
+    if commit_issue != branch_issue
+      puts "\e[33mWARNING: Your branch refers to id:#{branch_issue} but your commit message refers to id:#{commit_issue}. Did you make a typo?\e[0m"
+    end
+  end
+elsif !jira_pattern.match(message) && !tp_msg_pattern.match(message)
+  puts "\e[31mERROR: Your branch or your commit must refer to a JIRA issue (e.g. RIG-1234) or Target Process issue (e.g. issue1234 for branch name or id:1234 in commit message)\e[0m"
+  exit 1
+end

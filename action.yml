@@ -18,4 +18,4 @@ outputs:
     description: "Will be 'true' if it passed all checks, 'false' otherwise"
 runs:
   using: "node12"
-  main: "index.js"
+  main: "dist/index.js"

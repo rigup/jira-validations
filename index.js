@@ -1,8 +1,8 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
-const Dynamo = require("./dynamo");
+const Dynamo = require("./lib/dynamo");
 const Jira = require("./common/net/jira");
-const Action = require("./action");
+const Action = require("./lib/action");
 
 (async () => {
   try {

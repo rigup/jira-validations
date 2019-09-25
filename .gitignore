@@ -1,0 +1,9 @@
+.serverless
+*.sw*
+*~
+.DS_Store
+node_modules
+pkg
+npm-debug.log
+.vscode
+.env

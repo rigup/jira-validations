@@ -1,13 +1,19 @@
 {
   "name": "jira-validations",
   "version": "1.0.0",
-  "description": "",
+  "description": "This action prints verfied 'true' or 'false' if the github event contains a valid Jira Issue ID. Action also checks DynamoDB for User lookup information. A.k.a mapping a Github ID to a Jira Account ID.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "preinstall": "bash scripts/install_githooks.sh",
+    "lint": "npx eslint .",
+    "lint:fix": "npx eslint --fix .",
+    "lint-staged": "lint-staged",
+    "test": "mocha"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "actions",
+    "jira"
+  ],
   "license": "ISC",
   "dependencies": {
     "@actions/core": "^1.1.1",
@@ -16,5 +22,21 @@
     "lodash": "^4.17.15",
     "node-fetch": "^2.6.0",
     "url": "^0.11.0"
+  },
+  "devDependencies": {
+    "@rigup/eslint-config-rigup": "^0.0.8",
+    "aws-sdk-mock": "^4.5.0",
+    "chai": "^4.2.0",
+    "dotenv": "^8.0.0",
+    "eslint": "^6.2.1",
+    "jasmine": "^3.1.0",
+    "lint-staged": "~8.2.0",
+    "mocha": "^6.2.0",
+    "pre-commit": "^1.2.2",
+    "rewire": "^4.0.1",
+    "sinon": "^7.4.1"
+  },
+  "lint-staged": {
+    "*.js": "eslint --fix"
   }
 }

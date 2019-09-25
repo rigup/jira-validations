@@ -1,20 +1,22 @@
 # Jira Validations JavaScript Action
 
-This action prints verfied 'true' or 'false' if the github event contains a valid Jira Issue ID
+This action prints verfied 'true' or 'false' if the github event contains a valid Jira Issue ID.
+
+Action also checks DynamoDB for User lookup information. A.k.a mapping a Github ID to a Jira Account ID.
 
 ## Inputs
 
-### `verify-from`
+`verify-from`
 
 **Required** Can be `'branch'`, `'commits'` or `'all'`. Default `'branch'`.
 
-### `fail-invalid`
+`fail-invalid`
 
 **Required** Can be `true`, or `false`. Default `'true'`.
 
 If false, will fail a GitHub Check if Validation fails, otherwise all checks will pass.
 
-### `allowed-issue-types`
+`allowed-issue-types`
 
 **Required** Comma separated list of allowed Issue Types. If the matching issue type isn't in this list, validation fails.
 
@@ -22,11 +24,11 @@ Defaults to `"Task,Standalone Task,Bug"`
 
 ## Outputs
 
-### `verified`
+`verified`
 
-If Jira Issue ID is valid
+Can be `true` or `false` depending if the Jira Issue ID is verified
 
-## Example usage
+## Example: Add this action to your own workflow
 
 ```
 name: Validate PR
@@ -50,9 +52,50 @@ jobs:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       # Use the output from the `jira` step
       - name: Get the output
         run: echo "Verified ${{ steps.jira-pr.outputs.verified }}"
 
 ```
+
+## Development of this Action
+
+### Setup
+
+> Requires Node 12.x
+
+```
+npm install
+```
+
+Install `@zeit/ncc`
+
+```
+npm i -g @zeit/ncc
+```
+
+Compile the `index.js` file.
+
+```
+ncc build index.js
+```
+
+You'll see a new dist/index.js file with your code and the compiled modules.
+
+main keywork in `action.yml` points to `dist/index.js`
+
+### Testing
+
+```
+npm run test
+```
+
+### Deploying
+
+This action uses itself!
+
+So you'll need a valid branch name with Jira issue key, as well as all commit messages will need a Jira Issue Key :)
