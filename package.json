@@ -6,6 +6,7 @@
   "scripts": {
     "preinstall": "bash scripts/install_githooks.sh",
     "lint": "npx eslint .",
+    "build": "ncc build index.js",
     "lint:fix": "npx eslint --fix .",
     "lint-staged": "lint-staged",
     "test": "mocha"
