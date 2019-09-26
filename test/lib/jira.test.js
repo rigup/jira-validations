@@ -48,4 +48,18 @@ describe('Jira Class Test', () => {
     const edit = await jira.addCodeReviewersToIssue('EE-232', users);
     assert.notEqual(null, edit);
   });
+
+  it('addApproversToIssue should add assignees as approvers to an issue', async () => {
+    const accountIds = ['5be06148923d3245b8ba1a1f'];
+    const resp = await jira.getUsersFromAccountIds(accountIds);
+    const users = resp.values;
+
+    assert.notEqual(null, resp);
+    assert.notEqual(null, users);
+    assert.notEqual([], users);
+    assert.equal(1, users.length);
+
+    const edit = await jira.addApproversToIssue('EE-225', users);
+    assert.notEqual(null, edit);
+  });
 });

@@ -67,10 +67,18 @@ describe('Action Class Test', () => {
   });
 
   it('updateCodeReviewers() should return send req to Jira', async () => {
-    const jiraStub = sinon.stub(jira, 'addCodeReviewersToIssue').resolves({ status: 200 });
+    const jiraStub = sinon.stub(jira, 'addCodeReviewersToIssue').resolves({ status: 204 });
 
     await action.validate('all', 'Task,Standalone Task,Bug');
     await action.updateCodeReviewers();
+    sinon.assert.calledOnce(jiraStub);
+  });
+
+  it('updateApprovers() should return send req to Jira', async () => {
+    const jiraStub = sinon.stub(jira, 'addApproversToIssue').resolves({ status: 204 });
+
+    await action.validate('all', 'Task,Standalone Task,Bug');
+    await action.updateApprovers();
     sinon.assert.calledOnce(jiraStub);
   });
 });

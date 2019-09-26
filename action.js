@@ -104,6 +104,13 @@ module.exports = class {
     }));
   }
 
+  getApprovers() {
+    return this.githubEvent.pull_request.assignees.map((assignee) => ({
+      login: assignee.login,
+      id: assignee.id,
+    }));
+  }
+
   async getCommits() {
     this.core.info(
       JSON.stringify({
@@ -144,8 +151,6 @@ module.exports = class {
     const jiraAccountIds = rigupReviewers.map((rev) => rev.Items[0].bitbucketId.S);
     const resp = await this.Jira.getUsersFromAccountIds(jiraAccountIds);
 
-    console.log(resp);
-
     if (resp && resp.values) {
       this.core.debug(
         `Adding Jira Users as Code Reviewers: ${JSON.stringify(
@@ -153,6 +158,27 @@ module.exports = class {
         )}`
       );
       this.Jira.addCodeReviewersToIssue(this.issue.key, resp.values);
+    }
+  }
+
+  async updateApprovers() {
+    const approvers = this.getApprovers();
+    const rigupApprovers = await Promise.all(
+      approvers.map(async (approver) => {
+        return this.dynamo.findByGithubId(approver.id);
+      })
+    );
+
+    const jiraAccountIds = rigupApprovers.map((rev) => rev.Items[0].bitbucketId.S);
+    const resp = await this.Jira.getUsersFromAccountIds(jiraAccountIds);
+
+    if (resp && resp.values) {
+      this.core.debug(
+        `Adding Jira Users as Approvers: ${JSON.stringify(
+          resp.values.map((user) => user.displayName)
+        )}`
+      );
+      this.Jira.addApproversToIssue(this.issue.key, resp.values);
     }
   }
 };
