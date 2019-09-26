@@ -43,6 +43,7 @@ const Action = require('./action');
     }
 
     action.updateCodeReviewers();
+    action.updateApprovers();
 
     core.setOutput('verified', `${valid}`);
   } catch (error) {
