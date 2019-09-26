@@ -42,8 +42,8 @@ const Action = require('./action');
       core.setFailed('Validation Failed!');
     }
 
-    action.updateCodeReviewers();
-    action.updateApprovers();
+    await action.updateCodeReviewers();
+    await action.updateApprovers();
 
     core.setOutput('verified', `${valid}`);
   } catch (error) {
