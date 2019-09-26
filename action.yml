@@ -6,7 +6,7 @@ inputs:
     required: true
     default: "branch"
   fail-invalid: # id of input
-    description: "Describe how to fail if we have an invalid Jira ID. Can be 'true', 'false' or 'checks'"
+    description: "Describe how to fail if we have an invalid Jira ID. Can be 'true', or 'false'"
     required: true
     default: "true"
   allowed-issue-types: # id of input

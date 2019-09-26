@@ -55,10 +55,6 @@ const Jira = require("./lib/jira");
       core.setFailed("Validation Failed!");
     }
 
-    if (!valid && failInvalidInput === "checks") {
-      console.log(`TODO: Send GitHub Check`);
-    }
-
     const reviewers = action.getCodeReviewers();
     const rigupReviewers = await Promise.all(
       reviewers.map(async reviewer => {
@@ -66,7 +62,17 @@ const Jira = require("./lib/jira");
       })
     );
 
-    console.log(JSON.stringify(rigupReviewers));
+    const jiraAccountIds = rigupReviewers.map(rev => rev.Items[0].bitbucketId);
+    const jiraUsers = await jira.getUsersFromAccountIds(jiraAccountIds);
+
+    if (jiraUsers) {
+      console.log(
+        `Adding Jira Users as Code Reviewers: ${JSON.stringify(
+          jiraUsers.map(user => user.displayName)
+        )}`
+      );
+      jira.addCodeReviewersToIssue(action.issue.key, jiraUsers);
+    }
 
     core.setOutput("verified", `${valid}`);
   } catch (error) {
