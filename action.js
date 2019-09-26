@@ -1,0 +1,158 @@
+const JIRA_IDENTIFIER = /[A-Z]+-\d+/g;
+const GITHUB_OWNER = 'rigup';
+
+module.exports = class {
+  constructor({ context, jira, octokit, core, dynamo }) {
+    this.githubEvent = context.payload;
+    this.Jira = jira;
+    this.octkit = octokit;
+    this.core = core;
+    this.dynamo = dynamo;
+    this.issueIds = new Set();
+    this.issue = {};
+  }
+
+  validateStringHasIssueId(input) {
+    const matcher = input.match(JIRA_IDENTIFIER);
+    if (matcher === null) return false;
+
+    this.core.debug(JSON.stringify({ input, matcher }));
+    this.issueIds.add(matcher[0]);
+    return true;
+  }
+
+  validateBranchHasIssueId() {
+    return (
+      this.githubEvent.pull_request.head &&
+      this.validateStringHasIssueId(this.githubEvent.pull_request.head.ref)
+    );
+  }
+
+  async validateCommitsHaveIssueIds() {
+    const commits = await this.getCommits();
+    const masterMergeStart = [
+      "Merge branch 'master'",
+      `Merged master into ${this.githubEvent.pull_request.head.ref}`,
+    ];
+    const originMergeStart = [
+      "Merge remote-tracking branch 'origin/master'",
+      `Merge remote-tracking branch '${this.githubEvent.pull_request.head.ref}'`,
+    ];
+    const conflictResolutionStart = [
+      `Merge branch '${this.githubEvent.pull_request.head.ref}' of github.com:rigup/${this.githubEvent.repository.name}`,
+    ];
+    const filterMatches = [...masterMergeStart, ...originMergeStart, ...conflictResolutionStart];
+
+    let valid = true;
+
+    commits
+      .filter((commit) => {
+        const commitMessage = commit.commit.message;
+        return !filterMatches.some((matcher) => commitMessage.startsWith(matcher));
+      })
+      .forEach((commit) => {
+        if (!this.validateStringHasIssueId(commit.commit.message)) {
+          this.core.error(
+            `Commit message '${commit.commit.message}' doesn't have a valid Jira Issue`
+          );
+          valid = false;
+        }
+      });
+
+    return valid;
+  }
+
+  async validate(type, validIssueTypes) {
+    let valid = false;
+    switch (type) {
+      case 'all':
+        valid = (await this.validateCommitsHaveIssueIds()) && this.validateBranchHasIssueId();
+        break;
+      case 'commits':
+        valid = await this.validateCommitsHaveIssueIds();
+        break;
+      case 'branch':
+      default:
+        valid = this.validateBranchHasIssueId();
+    }
+
+    if (!valid) return false;
+
+    const { issue } = await this.getIssues();
+
+    if (!issue || !issue.key) {
+      return false;
+    }
+
+    if (validIssueTypes.indexOf(issue.fields.issuetype.name) === -1) {
+      this.core.error(
+        `Issue type ${issue.fields.issuetype.name} is not one of '${JSON.stringify(
+          validIssueTypes
+        )}'`
+      );
+      return false;
+    }
+
+    this.core.debug(`Issue Type - ${issue.fields.issuetype.name}`);
+    return true;
+  }
+
+  getCodeReviewers() {
+    return this.githubEvent.pull_request.requested_reviewers.map((rev) => ({
+      login: rev.login,
+      id: rev.id,
+    }));
+  }
+
+  async getCommits() {
+    this.core.info(
+      JSON.stringify({
+        repo: this.githubEvent.repository.name,
+        pull_number: this.githubEvent.number,
+      })
+    );
+
+    const { data } = await this.octkit.pulls.listCommits({
+      owner: GITHUB_OWNER,
+      repo: this.githubEvent.repository.name,
+      pull_number: this.githubEvent.number,
+    });
+    return data;
+  }
+
+  async getIssues() {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const issueKey of this.issueIds) {
+      // eslint-disable-next-line no-await-in-loop
+      const issue = await this.Jira.getIssue(issueKey);
+      if (issue) {
+        this.issue = issue;
+        return { issue };
+      }
+    }
+    return {};
+  }
+
+  async updateCodeReviewers() {
+    const reviewers = this.getCodeReviewers();
+    const rigupReviewers = await Promise.all(
+      reviewers.map(async (reviewer) => {
+        return this.dynamo.findByGithubId(reviewer.id);
+      })
+    );
+
+    const jiraAccountIds = rigupReviewers.map((rev) => rev.Items[0].bitbucketId.S);
+    const resp = await this.Jira.getUsersFromAccountIds(jiraAccountIds);
+
+    console.log(resp);
+
+    if (resp && resp.values) {
+      this.core.debug(
+        `Adding Jira Users as Code Reviewers: ${JSON.stringify(
+          resp.values.map((user) => user.displayName)
+        )}`
+      );
+      this.Jira.addCodeReviewersToIssue(this.issue.key, resp.values);
+    }
+  }
+};
