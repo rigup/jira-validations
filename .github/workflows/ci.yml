@@ -26,6 +26,13 @@ jobs:
             --url '${{ secrets.JIRA_BASE_URL }}/rest/api/3/field' \
             --user '${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}' \
             --header 'Accept: application/json'
+            
+      - name: Test Jira API Issue
+        run: |
+          curl -v --request GET \
+            --url '${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/EE-282' \
+            --user '${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}' \
+            --header 'Accept: application/json'
 
       - name: npm install, build, and test
         run: |
