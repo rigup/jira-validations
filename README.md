@@ -86,7 +86,7 @@ npm i -g @zeit/ncc
 npm run test
 ```
 
-### Deploying
+### Committing/Deploying
 
 This action uses itself!
 
