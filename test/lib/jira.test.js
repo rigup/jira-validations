@@ -11,11 +11,11 @@ describe('Jira Class Test', () => {
   const jira = new Jira(config);
 
   it('getIssue should return valid issue', async () => {
-    const issue = await jira.getIssue('EE-232');
+    const issue = await jira.getIssue('EE-282');
 
     assert.notEqual(null, issue);
     assert.notEqual({}, issue);
-    assert.equal('EE-232', issue.key);
+    assert.equal('EE-282', issue.key);
   });
 
   it('getUsers should return valid users', async () => {
@@ -45,7 +45,7 @@ describe('Jira Class Test', () => {
     assert.notEqual([], users);
     assert.equal(2, users.length);
 
-    const edit = await jira.addCodeReviewersToIssue('EE-232', users);
+    const edit = await jira.addCodeReviewersToIssue('EE-282', users);
     assert.notEqual(null, edit);
   });
 
@@ -59,7 +59,7 @@ describe('Jira Class Test', () => {
     assert.notEqual([], users);
     assert.equal(1, users.length);
 
-    const edit = await jira.addApproversToIssue('EE-225', users);
+    const edit = await jira.addApproversToIssue('EE-282', users);
     assert.notEqual(null, edit);
   });
 });
