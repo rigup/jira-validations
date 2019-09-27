@@ -17,13 +17,21 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+        
     - name: Authenticate with GitHub package registry
       run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+      
+    - name: Test Jira API
+      run: |
+        curl -v --request GET \
+          --url '${{ secrets.JIRA_BASE_URL }}/rest/api/3/field' \
+          --user '${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}' \
+          --header 'Accept: application/json'
+
     - name: npm install, build, and test
       run: |
         npm install
         npm i -g @zeit/ncc
-        npm run build --if-present
         npm run test
       env:
         CI: true
