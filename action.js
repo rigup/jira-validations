@@ -78,7 +78,7 @@ module.exports = class {
 
     if (!valid) return false;
 
-    const { issue } = await this.getIssues();
+    const { issue } = await this.getIssue();
 
     if (!issue || !issue.key) {
       return false;
@@ -127,7 +127,10 @@ module.exports = class {
     return data;
   }
 
-  async getIssues() {
+  async getIssue() {
+    if (this.issue.key) {
+      return { issue: this.issue };
+    }
     // eslint-disable-next-line no-restricted-syntax
     for (const issueKey of this.issueIds) {
       // eslint-disable-next-line no-await-in-loop
