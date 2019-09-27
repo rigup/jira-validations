@@ -47,6 +47,6 @@ const Action = require('./action');
 
     core.setOutput('verified', `${valid}`);
   } catch (error) {
-    core.setFailed(JSON.stringify(error.message));
+    core.setFailed(JSON.stringify(error));
   }
 })();

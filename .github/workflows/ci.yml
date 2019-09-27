@@ -4,34 +4,32 @@ on: [push, pull_request]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [8.x, 10.x, 12.x]
+        node-version: [12.x]
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-        
-    - name: Authenticate with GitHub package registry
-      run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
-      
-    - name: Test Jira API
-      run: |
-        curl -v --request GET \
-          --url '${{ secrets.JIRA_BASE_URL }}/rest/api/3/field' \
-          --user '${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}' \
-          --header 'Accept: application/json'
+      - uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: npm install, build, and test
-      run: |
-        npm install
-        npm i -g @zeit/ncc
-        npm run test
-      env:
-        CI: true
+      - name: Authenticate with GitHub package registry
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+
+      - name: Test Jira API
+        run: |
+          curl -v --request GET \
+            --url '${{ secrets.JIRA_BASE_URL }}/rest/api/3/field' \
+            --user '${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}' \
+            --header 'Accept: application/json'
+
+      - name: npm install, build, and test
+        run: |
+          npm install
+          npm run test
+        env:
+          CI: true
