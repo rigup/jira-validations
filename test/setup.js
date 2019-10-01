@@ -17,7 +17,23 @@ setupPolly({
       recordingsDir: path.resolve(__dirname, './recordings'),
     },
   },
-  logging: true,
+  logging: false,
+  matchRequestsBy: {
+    method: true,
+    headers: false,
+    body: false,
+    order: true,
+    url: {
+      protocol: true,
+      username: true,
+      password: true,
+      hostname: true,
+      port: true,
+      pathname: true,
+      query: true,
+      hash: false,
+    },
+  },
 });
 
 // eslint-disable-next-line func-names
