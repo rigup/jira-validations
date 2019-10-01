@@ -134,7 +134,8 @@ module.exports = class {
     // eslint-disable-next-line no-restricted-syntax
     for (const issueKey of this.issueIds) {
       // eslint-disable-next-line no-await-in-loop
-      const issue = await this.Jira.getIssue(issueKey);
+      const resp = await this.Jira.getIssue(issueKey);
+      const issue = resp.data;
       if (issue) {
         this.issue = issue;
         return { issue };
@@ -154,13 +155,13 @@ module.exports = class {
     const jiraAccountIds = rigupReviewers.map((rev) => rev.Items[0].bitbucketId.S);
     const resp = await this.Jira.getUsersFromAccountIds(jiraAccountIds);
 
-    if (resp && resp.values) {
+    if (resp && resp.data && resp.data.values) {
       this.core.debug(
         `Adding Jira Users as Code Reviewers: ${JSON.stringify(
-          resp.values.map((user) => user.displayName)
+          resp.data.values.map((user) => user.displayName)
         )}`
       );
-      this.Jira.addCodeReviewersToIssue(this.issue.key, resp.values);
+      this.Jira.addCodeReviewersToIssue(this.issue.key, resp.data.values);
     }
   }
 
@@ -175,13 +176,13 @@ module.exports = class {
     const jiraAccountIds = rigupApprovers.map((rev) => rev.Items[0].bitbucketId.S);
     const resp = await this.Jira.getUsersFromAccountIds(jiraAccountIds);
 
-    if (resp && resp.values) {
+    if (resp && resp.data && resp.data.values) {
       this.core.debug(
         `Adding Jira Users as Approvers: ${JSON.stringify(
-          resp.values.map((user) => user.displayName)
+          resp.data.values.map((user) => user.displayName)
         )}`
       );
-      this.Jira.addApproversToIssue(this.issue.key, resp.values);
+      this.Jira.addApproversToIssue(this.issue.key, resp.data.values);
     }
   }
 };

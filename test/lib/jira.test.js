@@ -11,16 +11,16 @@ describe('Jira Class Test', () => {
   const jira = new Jira(config);
 
   it('getIssue should return valid issue', async () => {
-    const issue = await jira.getIssue('EE-282');
-
+    const resp = await jira.getIssue('EE-282');
+    const issue = resp.data;
     assert.notEqual(null, issue);
     assert.notEqual({}, issue);
     assert.equal('EE-282', issue.key);
   });
 
   it('getUsers should return valid users', async () => {
-    const users = await jira.getUsers();
-
+    const resp = await jira.getUsers();
+    const users = resp.data;
     assert.notEqual(null, users);
     assert.notEqual([], users);
   });
@@ -30,15 +30,15 @@ describe('Jira Class Test', () => {
     const resp = await jira.getUsersFromAccountIds(accountIds);
 
     assert.notEqual(null, resp);
-    assert.notEqual(null, resp.values);
-    assert.notEqual([], resp.values);
-    assert.equal(2, resp.values.length);
+    assert.notEqual(null, resp.data.values);
+    assert.notEqual([], resp.data.values);
+    assert.equal(2, resp.data.values.length);
   });
 
   it('addCodeReviewersToIssue should add reviewers to an issue', async () => {
     const accountIds = ['5c7d4b0d16effa74fa9deac3', '5c6c66f347a54a6728e56778'];
     const resp = await jira.getUsersFromAccountIds(accountIds);
-    const users = resp.values;
+    const users = resp.data.values;
 
     assert.notEqual(null, resp);
     assert.notEqual(null, users);
@@ -52,9 +52,9 @@ describe('Jira Class Test', () => {
   it('addApproversToIssue should add assignees as approvers to an issue', async () => {
     const accountIds = ['5be06148923d3245b8ba1a1f'];
     const resp = await jira.getUsersFromAccountIds(accountIds);
-    const users = resp.values;
+    const users = resp.data.values;
 
-    assert.notEqual(null, resp);
+    assert.notEqual(null, resp.data);
     assert.notEqual(null, users);
     assert.notEqual([], users);
     assert.equal(1, users.length);
