@@ -22,7 +22,7 @@ const Action = require('./action');
 
     // `allowed-issue-types` input defined in action.yml
     const allowedIssueTypesInput = core.getInput('allowed-issue-types').split(',');
-    core.info(`Allowed Issue Types - ${JSON.stringify(allowedIssueTypesInput)}`);
+    core.debug(`Allowed Issue Types - ${JSON.stringify(allowedIssueTypesInput)}`);
 
     const config = {
       baseUrl: process.env.JIRA_BASE_URL,
