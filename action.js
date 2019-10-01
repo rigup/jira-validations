@@ -146,11 +146,14 @@ module.exports = class {
 
   async updateCodeReviewers() {
     const reviewers = this.getCodeReviewers();
+    console.log(`Reviewers: ${JSON.stringify(reviewers)}`);
     const rigupReviewers = await Promise.all(
       reviewers.map(async (reviewer) => {
         return this.dynamo.findByGithubId(reviewer.id);
       })
     );
+
+    console.log(`Rigup Reviewers: ${JSON.stringify(rigupReviewers)}`);
 
     const jiraAccountIds = rigupReviewers.map((rev) => rev.Items[0].bitbucketId.S);
     const resp = await this.Jira.getUsersFromAccountIds(jiraAccountIds);
@@ -167,11 +170,13 @@ module.exports = class {
 
   async updateApprovers() {
     const approvers = this.getApprovers();
+    console.log(`Approvers: ${JSON.stringify(approvers)}`);
     const rigupApprovers = await Promise.all(
       approvers.map(async (approver) => {
         return this.dynamo.findByGithubId(approver.id);
       })
     );
+    console.log(`Rigup Approvers: ${JSON.stringify(rigupApprovers)}`);
 
     const jiraAccountIds = rigupApprovers.map((rev) => rev.Items[0].bitbucketId.S);
     const resp = await this.Jira.getUsersFromAccountIds(jiraAccountIds);
