@@ -17,22 +17,7 @@ setupPolly({
       recordingsDir: path.resolve(__dirname, './recordings'),
     },
   },
-  matchRequestsBy: {
-    method: true,
-    headers: false,
-    body: false,
-    order: true,
-    url: {
-      protocol: true,
-      username: true,
-      password: true,
-      hostname: true,
-      port: true,
-      pathname: true,
-      query: false,
-      hash: false,
-    },
-  },
+  logging: true,
 });
 
 // eslint-disable-next-line func-names
@@ -42,7 +27,7 @@ beforeEach(function() {
   server.any().on('beforePersist', (req, recording) => {
     // eslint-disable-next-line no-param-reassign
     recording.request.headers = recording.request.headers.map((header) => {
-      if (header.name === 'authorization') {
+      if (header.name.toLowerCase() === 'authorization') {
         // eslint-disable-next-line no-param-reassign
         header.value = [''];
       }
