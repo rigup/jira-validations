@@ -201,13 +201,13 @@ module.exports = class {
   async autoAssignCreator() {
     const { user } = this.githubEvent.pull_request;
     if (!user) {
-      throw new Error(`No User on PR? - ${user}`);
+      this.core.error(`No User on PR? - ${user}`);
     }
 
     const rigupUser = await this.dynamo.findByGithubId(user.id);
 
     if (!rigupUser) {
-      throw new Error(`PR by unknown user? - ${user}`);
+      this.core.error(`PR by unknown user? - ${user}`);
     }
 
     const jiraAccountId = rigupUser.Items[0].bitbucketId.S;
