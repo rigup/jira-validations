@@ -44,6 +44,7 @@ const Action = require('./action');
 
     await action.updateCodeReviewers();
     await action.updateApprovers();
+    await action.autoAssignCreator();
 
     core.setOutput('verified', `${valid}`);
   } catch (error) {
