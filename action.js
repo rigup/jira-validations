@@ -93,11 +93,12 @@ module.exports = class {
       return false;
     }
 
-    this.core.debug(`Issue Type - ${issue.fields.issuetype.name}`);
+    this.core.info(`Issue Type - ${issue.fields.issuetype.name}`);
     return true;
   }
 
   getCodeReviewers() {
+    this.core.info(`Reviewers: ${this.githubEvent.pull_request.requested_reviewers}`);
     return this.githubEvent.pull_request.requested_reviewers.map((rev) => ({
       login: rev.login,
       id: rev.id,
@@ -194,6 +195,27 @@ module.exports = class {
         )}`
       );
       this.Jira.addApproversToIssue(this.issue.key, resp.data.values);
+    }
+  }
+
+  async autoAssignCreator() {
+    const { user } = this.githubEvent.pull_request;
+    if (!user) {
+      this.core.error(`No User on PR? - ${user}`);
+    }
+
+    const rigupUser = await this.dynamo.findByGithubId(user.id);
+
+    if (!rigupUser) {
+      this.core.error(`PR by unknown user? - ${user}`);
+    }
+
+    const jiraAccountId = rigupUser.Items[0].bitbucketId.S;
+    const resp = await this.Jira.getUsersFromAccountIds([jiraAccountId]);
+
+    if (resp && resp.data && resp.data.values) {
+      this.core.info(`Adding PR Creator, ${resp.data.values[0].name}, as ticket assignee`);
+      this.Jira.addAssigneeToIssue(this.issue.key, resp.data.values[0]);
     }
   }
 };
