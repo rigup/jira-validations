@@ -48,6 +48,8 @@ if jira_branch_match
       puts "\e[32mIssue Status: #{status}!\e[0m"
     end
 
+    puts "\n\u{1f60e}\n"
+
   else
     puts "\e[33mWARNING: No Jira credentials located at `~/.jira/credentials`!\e[0m"
   end
