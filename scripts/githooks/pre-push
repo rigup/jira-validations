@@ -28,6 +28,7 @@ if jira_branch_match
 
     if resp.code == 404
       puts "\e[31mERROR: Issue: #{branch_issue} not found!\e[0m"
+      puts "\u{1f633}\n"
       exit 1
     end
 
@@ -38,11 +39,13 @@ if jira_branch_match
       puts "\e[32mIssue Type: #{issue_type}!\e[0m"
     else
       puts "\e[31mERROR: Issue type is #{issue_type}!\e[0m"
+      puts "\u{1f622}\n"
       exit 1
     end
 
     if status == 'Done'
       puts "\e[31mERROR: Issue is already #{status}!\e[0m"
+      puts "\u{1f928}\n"
       exit 1
     else
       puts "\e[32mIssue Status: #{status}!\e[0m"
@@ -52,5 +55,6 @@ if jira_branch_match
 
   else
     puts "\e[33mWARNING: No Jira credentials located at `~/.jira/credentials`!\e[0m"
+    puts "\u{1f62c}\n"
   end
 end
