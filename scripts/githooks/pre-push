@@ -1,0 +1,57 @@
+#!/usr/bin/env ruby
+
+require 'net/http'
+require 'uri'
+require 'json'
+
+branch_name = `git rev-parse --abbrev-ref HEAD`
+jira_pattern = /[A-Z]+-\d+/i
+jira_branch_match = jira_pattern.match(branch_name)
+
+if jira_branch_match
+  branch_issue = jira_branch_match[0].upcase
+  jira_creds_dir = File.join(ENV['HOME'], '.jira', 'credentials')
+
+  if File.exist?(jira_creds_dir)
+    creds = Hash[File.read(jira_creds_dir).split("\n").map{|i|i.split('=')}]
+    url = creds['JIRA_BASE_URL']
+    token = creds['JIRA_API_TOKEN']
+    username = creds['JIRA_USER_EMAIL']
+
+    uri = URI.parse("#{url}/rest/api/3/issue/#{branch_issue}")
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    request = Net::HTTP::Get.new(uri.request_uri)
+    request.basic_auth(username, token)
+    resp = http.request(request)
+    response = JSON.parse(resp.body)
+
+    if resp.code == 404
+      puts "\e[31mERROR: Issue: #{branch_issue} not found!\e[0m"
+      exit 1
+    end
+
+    issue_type = response['fields']['issuetype']['name']
+    status = response['fields']['status']['name']
+
+    if issue_type == 'Task' || issue_type == 'Standalone Task' || issue_type == 'Bug'
+      puts "\e[32mIssue Type: #{issue_type}!\e[0m"
+    else
+      puts "\e[31mERROR: Issue type is #{issue_type}!\e[0m"
+      exit 1
+    end
+
+    if status == 'Done'
+      puts "\e[31mERROR: Issue is already #{status}!\e[0m"
+      exit 1
+    else
+      puts "\e[32mIssue Status: #{status}!\e[0m"
+    end
+
+  rescue StandardError => e
+    puts "\e[31mERROR: #{e}!\e[0m"
+
+  else
+    puts "\e[33mWARNING: No Jira credentials detected at `~/.jira/credentials`!\e[0m"
+  end
+end
