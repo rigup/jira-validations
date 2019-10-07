@@ -52,6 +52,6 @@ if jira_branch_match
     puts "\e[31mERROR: #{e}!\e[0m"
 
   else
-    puts "\e[33mWARNING: No Jira credentials detected at `~/.jira/credentials`!\e[0m"
+    puts "\e[33mWARNING: No Jira credentials located at `~/.jira/credentials`!\e[0m"
   end
 end
