@@ -40,11 +40,11 @@ const Action = require('./action');
 
     if (!valid && failInvalidInput === 'true') {
       core.setFailed('Validation Failed!');
+    } else {
+      await action.updateCodeReviewers();
+      await action.updateApprovers();
+      await action.autoAssignCreator();
     }
-
-    await action.updateCodeReviewers();
-    await action.updateApprovers();
-    await action.autoAssignCreator();
 
     core.setOutput('verified', `${valid}`);
   } catch (error) {
