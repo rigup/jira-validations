@@ -1,4 +1,5 @@
 const JIRA_IDENTIFIER = /[A-Z]+-\d+/g;
+const TP_BRANCH_IDENTIFIER = /^(?:issue)?(\d+)\b/g;
 const GITHUB_OWNER = 'rigup';
 
 module.exports = class {
@@ -10,6 +11,22 @@ module.exports = class {
     this.dynamo = dynamo;
     this.issueIds = new Set();
     this.issue = {};
+  }
+
+  isTargetProcess() {
+    return (
+      this.githubEvent.pull_request.head &&
+      this.validateStringHasTPIssueId(this.githubEvent.pull_request.head.ref)
+    );
+  }
+
+  validateStringHasTPIssueId(input) {
+    const matcher = input.match(TP_BRANCH_IDENTIFIER);
+    if (matcher === null) return false;
+
+    this.core.debug(JSON.stringify({ input, matcher }));
+    this.issueIds.add(matcher[0]);
+    return true;
   }
 
   validateStringHasIssueId(input) {
@@ -98,7 +115,9 @@ module.exports = class {
   }
 
   getCodeReviewers() {
-    this.core.info(`Reviewers: ${this.githubEvent.pull_request.requested_reviewers}`);
+    this.core.info(
+      `Reviewers: ${this.githubEvent.pull_request.requested_reviewers.map((r) => r.login)}`
+    );
     return this.githubEvent.pull_request.requested_reviewers.map((rev) => ({
       login: rev.login,
       id: rev.id,
@@ -162,7 +181,7 @@ module.exports = class {
     const resp = await this.Jira.getUsersFromAccountIds(jiraAccountIds);
 
     if (resp && resp.data && resp.data.values) {
-      this.core.debug(
+      this.core.info(
         `Adding Jira Users as Code Reviewers: ${JSON.stringify(
           resp.data.values.map((user) => user.displayName)
         )}`
@@ -189,7 +208,7 @@ module.exports = class {
     const resp = await this.Jira.getUsersFromAccountIds(jiraAccountIds);
 
     if (resp && resp.data && resp.data.values) {
-      this.core.debug(
+      this.core.info(
         `Adding Jira Users as Approvers: ${JSON.stringify(
           resp.data.values.map((user) => user.displayName)
         )}`

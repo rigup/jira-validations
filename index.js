@@ -36,14 +36,17 @@ const Action = require('./action');
     const { context } = github;
     const action = new Action({ context, jira, octokit, core, dynamo });
 
-    const valid = await action.validate(verifyFromInput, allowedIssueTypesInput);
+    let valid = true;
+    if (!action.isTargetProcess()) {
+      valid = await action.validate(verifyFromInput, allowedIssueTypesInput);
 
-    if (!valid && failInvalidInput === 'true') {
-      core.setFailed('Validation Failed!');
-    } else {
-      await action.updateCodeReviewers();
-      await action.updateApprovers();
-      await action.autoAssignCreator();
+      if (!valid && failInvalidInput === 'true') {
+        core.setFailed('Validation Failed!');
+      } else {
+        await action.updateCodeReviewers();
+        await action.updateApprovers();
+        await action.autoAssignCreator();
+      }
     }
 
     core.setOutput('verified', `${valid}`);
