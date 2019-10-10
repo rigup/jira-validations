@@ -25,7 +25,7 @@ end
 
 branch_name = `git rev-parse --abbrev-ref HEAD`
 
-jira_pattern = /[A-Z]+-\d+/i
+jira_pattern = /[A-Z]+(?<!id)-\d+/i
 jira_branch_match = jira_pattern.match(branch_name)
 
 tp_branch_pattern = /^(issue)?(\d+)(?:-.+)?$/i

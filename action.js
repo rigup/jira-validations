@@ -1,4 +1,4 @@
-const JIRA_IDENTIFIER = /[A-Z]+-\d+/g;
+const JIRA_IDENTIFIER = /^[a-zA-Z]+(?<!id)-\d+/g;
 const TP_BRANCH_IDENTIFIER = /^(?:issue)?(\d+)\b/g;
 const GITHUB_OWNER = 'rigup';
 
