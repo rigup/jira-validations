@@ -179,9 +179,9 @@ module.exports = class {
 
     const jiraAccountIds = rigupReviewers.reduce((reviewers, record) => {
       if(record.Items[0].bitbucketId) {
-        reviewers.push(record.Items[0].bitbucketId.S)
+        reviewers.push(record.Items[0].bitbucketId["S"])
       } else {
-        this.core.info(`Unknown Atlassian user ${record.Items[0].fullName.S}` )
+        this.core.info(`Unknown Atlassian user ${record.Items[0].fullName["S"]}` )
       }
       return reviewers;
     }, []);
@@ -214,7 +214,7 @@ module.exports = class {
     
     const jiraAccountIds = rigupApprovers.reduce((approvers, record) => {
       if(record.Items[0].bitbucketId) {
-        approvers.push(record.Items[0].bitbucketId.S)
+        approvers.push(record.Items[0].bitbucketId["S"])
       } else {
         this.core.info(`Unknown Atlassian user ${record.Items[0].fullName.S}` )
       }
@@ -248,7 +248,7 @@ module.exports = class {
     if(!rigupUser.Items[0].bitbucketId) {
       this.core.error("Unknown Atlassian user")
     }
-    const jiraAccountId = rigupUser.Items[0].bitbucketId.S;
+    const jiraAccountId = rigupUser.Items[0].bitbucketId["S"];
     const resp = await this.Jira.getUsersFromAccountIds([jiraAccountId]);
 
     if (resp && resp.data && resp.data.values) {
