@@ -39,13 +39,7 @@ module.exports = class {
     return true;
   }
 
-  async validateBranchHasIssueId() {
-    const commits = await this.getCommits();
-
-    if (this.containsRobotCommits(commits)) {
-      return true;
-    }
-
+  validateBranchHasIssueId() {
     return (
       this.githubEvent.pull_request.head &&
       this.validateStringHasIssueId(this.githubEvent.pull_request.head.ref)
@@ -60,13 +54,8 @@ module.exports = class {
     );
   }
 
-  async validateCommitsHaveIssueIds() {
+  async validateCommitsHaveIssueIds(commits) {
     let valid = true;
-    const commits = await this.getCommits();
-
-    if (this.containsRobotCommits(commits)) {
-      return valid;
-    }
 
     const masterMergeStart = [
       "Merge branch 'master'",
@@ -106,18 +95,24 @@ module.exports = class {
 
   async validate(type, validIssueTypes) {
     let valid = false;
+    const commits = await this.getCommits();
+
+    if (this.containsRobotCommits(commits)) {
+      return true;
+    }
+
     switch (type) {
       case "all":
         valid =
-          (await this.validateCommitsHaveIssueIds()) &&
-          (await this.validateBranchHasIssueId());
+          (await this.validateCommitsHaveIssueIds(commits)) &&
+          this.validateBranchHasIssueId();
         break;
       case "commits":
-        valid = await this.validateCommitsHaveIssueIds();
+        valid = await this.validateCommitsHaveIssueIds(commits);
         break;
       case "branch":
       default:
-        valid = await this.validateBranchHasIssueId();
+        valid = this.validateBranchHasIssueId();
     }
 
     if (!valid) return false;
