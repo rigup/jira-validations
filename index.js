@@ -45,16 +45,13 @@ const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
       pull_number: context.payload.number,
     });
 
-    if (
+    const isRobot =
       commits.filter((commit) => {
         return ROBOTS.indexOf(commit.author.login) !== -1;
-    }).length > 0
-    ) {
-      return true;
-    }
+    }).length > 0;
 
     let valid = true;
-    if (!action.isTargetProcess()) {
+    if (!isRobot && !action.isTargetProcess()) {
       valid = await action.validate(verifyFromInput, allowedIssueTypesInput);
 
       if (!valid && failInvalidInput === 'true') {
