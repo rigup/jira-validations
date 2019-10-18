@@ -4,6 +4,9 @@ const Dynamo = require('./lib/dynamo');
 const Jira = require('./lib/jira');
 const Action = require('./action');
 
+const GITHUB_OWNER = "rigup";
+const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
+
 (async () => {
   try {
     if (!process.env.JIRA_BASE_URL) throw new Error('Please specify JIRA_BASE_URL env');
@@ -36,8 +39,19 @@ const Action = require('./action');
     const { context } = github;
     const action = new Action({ context, jira, octokit, core, dynamo });
 
+    const commits = await octokit.pulls.listCommits({
+      owner: GITHUB_OWNER,
+      repo: context.payload.repository.name,
+      pull_number: context.payload.number,
+    });
+
+    const isRobot =
+      commits.filter((commit) => {
+        return ROBOTS.indexOf(commit.author.login) !== -1;
+    }).length > 0;
+
     let valid = true;
-    if (!action.isTargetProcess()) {
+    if (!isRobot && !action.isTargetProcess()) {
       valid = await action.validate(verifyFromInput, allowedIssueTypesInput);
 
       if (!valid && failInvalidInput === 'true') {
@@ -51,6 +65,7 @@ const Action = require('./action');
 
     core.setOutput('verified', `${valid}`);
   } catch (error) {
+    core.error(JSON.stringify(error));
     core.setFailed(JSON.stringify(error));
   }
 })();
