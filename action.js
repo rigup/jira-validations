@@ -1,7 +1,7 @@
 const JIRA_IDENTIFIER = /^[a-zA-Z]+(?<!id)-\d+/g;
 const TP_BRANCH_IDENTIFIER = /^(?:issue)?(\d+)\b/g;
 const GITHUB_OWNER = "rigup";
-const ROBOTS = ["dependabot[bot]"];
+const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
 
 module.exports = class {
   constructor({ context, jira, octokit, core, dynamo }) {
