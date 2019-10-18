@@ -1,6 +1,6 @@
 # Jira Validations JavaScript Action
 
-This action prints verfied 'true' or 'false' if the github event contains a valid Jira Issue ID.
+This action prints verified 'true' or 'false' if the github event contains a valid Jira Issue ID.
 
 Action also checks DynamoDB for User lookup information. A.k.a mapping a Github ID to a Jira Account ID.
 
