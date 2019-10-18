@@ -46,7 +46,6 @@ const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
     const { context } = github;
     const action = new Action({ context, jira, octokit, core, dynamo });
 
-    // core.info(`About to pull commits`);
     core.info(JSON.stringify(context.payload, null, 2));
     // const commits = await octokit.pulls.listCommits({
     //   owner: GITHUB_OWNER,
