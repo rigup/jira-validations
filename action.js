@@ -1,7 +1,6 @@
 const JIRA_IDENTIFIER = /^[a-zA-Z]+(?<!id)-\d+/g;
 const TP_BRANCH_IDENTIFIER = /^(?:issue)?(\d+)\b/g;
 const GITHUB_OWNER = "rigup";
-const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
 
 module.exports = class {
   constructor({ context, jira, octokit, core, dynamo }) {
@@ -43,14 +42,6 @@ module.exports = class {
     return (
       this.githubEvent.pull_request.head &&
       this.validateStringHasIssueId(this.githubEvent.pull_request.head.ref)
-    );
-  }
-
-  containsRobotCommits(commits) {
-    return (
-      commits.filter(commit => {
-        return ROBOTS.indexOf(commit.author.login) !== -1;
-      }).length > 0
     );
   }
 
@@ -96,10 +87,6 @@ module.exports = class {
   async validate(type, validIssueTypes) {
     let valid = false;
     const commits = await this.getCommits();
-
-    if (this.containsRobotCommits(commits)) {
-      return true;
-    }
 
     switch (type) {
       case "all":
