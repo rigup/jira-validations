@@ -206,9 +206,17 @@ module.exports = class {
       })
     );
 
-    const jiraAccountIds = rigupReviewers.map(
-      rev => rev.Items[0].bitbucketId.S
-    );
+    const jiraAccountIds = rigupReviewers.reduce((reviewers, record) => {
+      if (record.Items[0].atlassianId) {
+        reviewers.push(record.Items[0].atlassianId["S"]);
+      } else {
+        this.core.info(
+          `Unknown Atlassian user ${record.Items[0].fullName["S"]}`
+        );
+      }
+      return reviewers;
+    }, []);
+
     const resp = await this.Jira.getUsersFromAccountIds(jiraAccountIds);
 
     if (resp && resp.data && resp.data.values) {
@@ -235,9 +243,15 @@ module.exports = class {
       })
     );
 
-    const jiraAccountIds = rigupApprovers.map(
-      rev => rev.Items[0].bitbucketId.S
-    );
+    const jiraAccountIds = rigupApprovers.reduce((approvers, record) => {
+      if (record.Items[0].atlassianId) {
+        approvers.push(record.Items[0].atlassianId["S"]);
+      } else {
+        this.core.info(`Unknown Atlassian user ${record.Items[0].fullName.S}`);
+      }
+      return approvers;
+    }, []);
+
     const resp = await this.Jira.getUsersFromAccountIds(jiraAccountIds);
 
     if (resp && resp.data && resp.data.values) {
@@ -262,7 +276,10 @@ module.exports = class {
       this.core.error(`PR by unknown user? - ${user}`);
     }
 
-    const jiraAccountId = rigupUser.Items[0].bitbucketId.S;
+    if (!rigupUser.Items[0].atlassianId) {
+      this.core.error("Unknown Atlassian user");
+    }
+    const jiraAccountId = rigupUser.Items[0].atlassianId["S"];
     const resp = await this.Jira.getUsersFromAccountIds([jiraAccountId]);
 
     if (resp && resp.data && resp.data.values) {
