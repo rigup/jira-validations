@@ -46,22 +46,11 @@ const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
     const { context } = github;
     const action = new Action({ context, jira, octokit, core, dynamo });
 
-    core.info(JSON.stringify(context.payload, null, 2));
-    // const commits = await octokit.pulls.listCommits({
-    //   owner: GITHUB_OWNER,
-    //   repo: context.payload.repository.name,
-    //   pull_number: context.payload.number
-    // });
-    // core.info(`Commits - ${commits.length}`);
-
-    // const isRobot =
-    //   commits.filter(commit => {
-    //     return ROBOTS.indexOf(commit.author.login) !== -1;
-    //   }).length > 0;
-    // core.info(`Robot - ${isRobot}`);
+    const isRobot = ROBOTS.indexOf(context.payload.pull_request.user.login) !== -1;
+    core.info(`Is Robot - ${isRobot}`);
 
     let valid = true;
-    if (/*!isRobot &&*/ !action.isTargetProcess()) {
+    if (!isRobot && !action.isTargetProcess()) {
       valid = await action.validate(verifyFromInput, allowedIssueTypesInput);
 
       if (!valid && failInvalidInput === "true") {
