@@ -44,11 +44,13 @@ const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
       repo: context.payload.repository.name,
       pull_number: context.payload.number,
     });
+    core.info(`Commits - ${commits.length}`);
 
     const isRobot =
       commits.filter((commit) => {
         return ROBOTS.indexOf(commit.author.login) !== -1;
     }).length > 0;
+    core.info(`Robot - ${isRobot}`);
 
     let valid = true;
     if (!isRobot && !action.isTargetProcess()) {
