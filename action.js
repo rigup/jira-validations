@@ -39,7 +39,7 @@ module.exports = class {
   }
 
   validateBranchHasIssueId() {
-    if (this.githubEvent.pull_request.head.ref.startsWith('revert') {
+    if (this.githubEvent.pull_request.head.ref.startsWith("revert")) {
       return true;
     }
 
@@ -63,9 +63,7 @@ module.exports = class {
     const conflictResolutionStart = [
       `Merge branch '${this.githubEvent.pull_request.head.ref}' of github.com:rigup/${this.githubEvent.repository.name}`
     ];
-    const revertStart = [
-      `Revert`
-    ];
+    const revertStart = [`Revert`];
     const filterMatches = [
       ...masterMergeStart,
       ...originMergeStart,
