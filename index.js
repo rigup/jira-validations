@@ -32,7 +32,9 @@ const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
     const allowedIssueTypesInput = core
       .getInput("allowed-issue-types")
       .split(",");
-    core.info(`Allowed Issue Types - ${JSON.stringify(allowedIssueTypesInput)}`);
+    core.info(
+      `Allowed Issue Types - ${JSON.stringify(allowedIssueTypesInput)}`
+    );
 
     const config = {
       baseUrl: process.env.JIRA_BASE_URL,
@@ -46,7 +48,8 @@ const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
     const { context } = github;
     const action = new Action({ context, jira, octokit, core, dynamo });
 
-    const isRobot = ROBOTS.indexOf(context.payload.pull_request.user.login) !== -1;
+    const isRobot =
+      ROBOTS.indexOf(context.payload.pull_request.user.login) !== -1;
     core.info(`Is Robot - ${isRobot}`);
 
     let valid = true;
@@ -57,7 +60,6 @@ const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
         core.setFailed("Validation Failed!");
       } else {
         await action.updateCodeReviewers();
-        await action.updateApprovers();
         await action.autoAssignCreator();
       }
     }
