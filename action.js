@@ -141,11 +141,16 @@ module.exports = class {
     }));
   }
 
-  getApprovers() {
+  getAssignees() {
     return this.githubEvent.pull_request.assignees.map(assignee => ({
       login: assignee.login,
       id: assignee.id
     }));
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getApprovers() {
+    return [];
   }
 
   async getCommits() {
@@ -194,18 +199,25 @@ module.exports = class {
       })
     );
 
-    const jiraAccountIds = rigupReviewers.reduce((reviewers, record) => {
+    const jiraAccountIds = rigupReviewers.reduce((reviewerSet, record) => {
       if (record.Items[0].atlassianId) {
-        reviewers.push(record.Items[0].atlassianId["S"]);
+        reviewerSet.add(record.Items[0].atlassianId["S"]);
       } else {
         this.core.info(
           `Unknown Atlassian user ${record.Items[0].fullName["S"]}`
         );
       }
-      return reviewers;
-    }, []);
+      return reviewerSet;
+    }, new Set());
 
-    const resp = await this.Jira.getUsersFromAccountIds(jiraAccountIds);
+    const currentCodeReviewers = this.issue.fields.customfield_10180;
+    if (currentCodeReviewers && currentCodeReviewers.length > 0) {
+      currentCodeReviewers.forEach(rev => jiraAccountIds.add(rev.accountId));
+    }
+
+    const resp = await this.Jira.getUsersFromAccountIds(
+      Array.from(jiraAccountIds)
+    );
 
     if (resp && resp.data && resp.data.values) {
       this.core.info(
