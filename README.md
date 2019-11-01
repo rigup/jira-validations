@@ -95,7 +95,7 @@ So you'll need a valid branch name with Jira issue key, as well as all commit me
 Compile the `index.js` file.
 
 ```
-ncc build index.js
+npm run build
 ```
 
 You'll see a new dist/index.js file with your code and the compiled modules.
