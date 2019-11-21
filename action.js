@@ -268,16 +268,25 @@ module.exports = class {
     const { user } = this.githubEvent.pull_request;
     if (!user) {
       this.core.error(`No User on PR? - ${user}`);
+      return;
     }
 
-    const rigupUser = await this.dynamo.findByGithubId(user.id);
+    let rigupUser;
+    try {
+      rigupUser = await this.dynamo.findByGithubId(user.id);
+    } catch (error) {
+      this.core.error(error);
+      return;
+    }
 
     if (!rigupUser) {
       this.core.error(`PR by unknown user? - ${user}`);
+      return;
     }
 
     if (!rigupUser.Items[0].atlassianId) {
       this.core.error("Unknown Atlassian user");
+      return;
     }
     const jiraAccountId = rigupUser.Items[0].atlassianId["S"];
     const resp = await this.Jira.getUsersFromAccountIds([jiraAccountId]);
