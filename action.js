@@ -289,19 +289,18 @@ module.exports = class {
       return;
     }
     const jiraAccountId = rigupUser.Items[0].atlassianId["S"];
-    const resp = await this.Jira.getUsersFromAccountIds([jiraAccountId]);
 
-    if (resp) {
-      this.core.info(
-        `autoAssignCreator - Jira User: ${JSON.stringify(resp.data.values[0])}`
-      );
-    }
+    try {
+      const resp = await this.Jira.getUsersFromAccountIds([jiraAccountId]);
 
-    if (resp && resp.data && resp.data.values && resp.data.values[0]) {
-      this.core.info(
-        `Adding PR Creator, ${resp.data.values[0].name}, as ticket assignee`
-      );
-      this.Jira.addAssigneeToIssue(this.issue.key, resp.data.values[0]);
+      if (resp && resp.data && resp.data.values && resp.data.values[0]) {
+        this.core.info(
+          `Adding PR Creator, ${resp.data.values[0].name}, as ticket assignee`
+        );
+        this.Jira.addAssigneeToIssue(this.issue.key, resp.data.values[0]);
+      }
+    } catch (error) {
+      this.core.error(error);
     }
   }
 };
