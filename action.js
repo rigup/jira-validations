@@ -271,8 +271,9 @@ module.exports = class {
       return;
     }
 
+    let rigupUser;
     try {
-      const rigupUser = await this.dynamo.findByGithubId(user.id);
+      rigupUser = await this.dynamo.findByGithubId(user.id);
     } catch (error) {
       this.core.error(error);
       return;
