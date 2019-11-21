@@ -66,7 +66,7 @@ const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
 
     core.setOutput("verified", `${valid}`);
   } catch (error) {
-    core.error(JSON.stringify(error));
-    core.setFailed(JSON.stringify(error));
+    core.error(error);
+    core.setFailed(error);
   }
 })();
