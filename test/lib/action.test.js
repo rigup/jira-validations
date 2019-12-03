@@ -83,8 +83,7 @@ describe("Action Class Test", () => {
     it("validate() should return valid", async () => {
       const valid = await action.validate("all", "Task,Standalone Task,Bug");
 
-      assert.notEqual(null, valid);
-      assert.notEqual(false, valid);
+      assert.equal(true, valid);
       assert.equal("EE-282", action.issue.key);
     });
 
@@ -123,6 +122,25 @@ describe("Action Class Test", () => {
     it("isTargetProcess() should return false", () => {
       const isTp = action.isTargetProcess();
       assert.equal(false, isTp);
+    });
+
+    it("validateCommitsHaveIssueIds() should return true on reverts", async () => {
+      const commits = [
+        {
+          commit: {
+            author: {},
+            message: 'Revert "WC-213: Apply pendo styling to proper elements"'
+          }
+        }
+      ];
+      const valid = await action.validateCommitsHaveIssueIds(commits);
+      assert.equal(true, valid);
+    });
+
+    it("validateBranchHasIssueId() should return true on reverts", () => {
+      const branchName = "revert-1357-WC-213-pendo-css";
+      const valid = action.validateBranchHasIssueId(branchName);
+      assert.equal(true, valid);
     });
   });
 });
