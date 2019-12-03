@@ -137,10 +137,11 @@ describe("Action Class Test", () => {
       assert.equal(true, valid);
     });
 
-    it("validateBranchHasIssueId() should return true on reverts", () => {
+    it("validateBranchHasIssueId() should return true on reverts", async () => {
       const branchName = "revert-1357-WC-213-pendo-css";
       const valid = action.validateBranchHasIssueId(branchName);
       assert.equal(true, valid);
+      assert.equal("WC-213", [...action.issueIds][1]);
     });
   });
 });
