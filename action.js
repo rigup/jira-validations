@@ -1,4 +1,5 @@
 const JIRA_IDENTIFIER = /[a-zA-Z]+(?<!id)-\d+/;
+const JIRA_BRANCH_REVERT_IDENTIFIER = /^revert-\d+-([a-zA-Z]+-\d+)/;
 const TP_BRANCH_IDENTIFIER = /^(?:issue)?(\d+)\b/g;
 const GITHUB_OWNER = "rigup";
 
@@ -39,8 +40,16 @@ module.exports = class {
   }
 
   validateBranchHasIssueId(branchName) {
-    this.core.info(`Validating branch name '${branchName}'...`);
+    this.core.info(`Validating branch name '${branchName}'`);
     if (branchName.startsWith("revert")) {
+      const matcher = branchName.match(JIRA_BRANCH_REVERT_IDENTIFIER);
+      if (matcher === null) {
+        this.core.error("No issue match for revert branch name");
+        return false;
+      }
+
+      this.core.info(JSON.stringify({ branchName, matcher }));
+      this.issueIds.add(matcher[1]);
       return true;
     }
 
