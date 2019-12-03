@@ -137,7 +137,7 @@ describe("Action Class Test", () => {
       assert.equal(true, valid);
     });
 
-    it("validateBranchHasIssueId() should return true on reverts", async () => {
+    it("validateBranchHasIssueId() should return true on reverts", () => {
       const branchName = "revert-1357-WC-213-pendo-css";
       const valid = action.validateBranchHasIssueId(branchName);
       assert.equal(true, valid);
