@@ -38,18 +38,20 @@ module.exports = class {
     return true;
   }
 
-  validateBranchHasIssueId() {
-    if (this.githubEvent.pull_request.head.ref.startsWith("revert")) {
+  validateBranchHasIssueId(branchName) {
+    this.core.info(`Validating branch name '${branchName}'...`);
+    if (branchName.startsWith("revert")) {
       return true;
     }
 
     return (
       this.githubEvent.pull_request.head &&
-      this.validateStringHasIssueId(this.githubEvent.pull_request.head.ref)
+      this.validateStringHasIssueId(branchName)
     );
   }
 
   async validateCommitsHaveIssueIds(commits) {
+    this.core.info("Validating commits...");
     let valid = true;
 
     const masterMergeStart = [
@@ -93,19 +95,27 @@ module.exports = class {
   async validate(type, validIssueTypes) {
     let valid = false;
     const commits = await this.getCommits();
+    const branchName = this.githubEvent.pull_request.head.ref;
+    const validCommits = await this.validateCommitsHaveIssueIds(commits);
+    const validBranch = this.validateBranchHasIssueId(branchName);
 
     switch (type) {
       case "all":
-        valid =
-          (await this.validateCommitsHaveIssueIds(commits)) &&
-          this.validateBranchHasIssueId();
+        valid = validCommits && validBranch;
         break;
       case "commits":
-        valid = await this.validateCommitsHaveIssueIds(commits);
+        valid = validCommits;
+        if (!validBranch) {
+          this.core.warn(`Invalid Branch Warning. Branch name: ${branchName}`);
+        }
         break;
       case "branch":
       default:
-        valid = this.validateBranchHasIssueId();
+        valid = validBranch;
+        if (!validCommits) {
+          this.core.warn(`Invalid Commits Warning!`);
+        }
+        break;
     }
 
     if (!valid) return false;
