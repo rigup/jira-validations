@@ -36,6 +36,10 @@ const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
       `Allowed Issue Types - ${JSON.stringify(allowedIssueTypesInput)}`
     );
 
+    // `release-platform` input defined in action.yml
+    const releasePlatform = core.getInput("release-platform");
+    core.debug(`Release Platform: ${releasePlatform}`);
+
     const config = {
       baseUrl: process.env.JIRA_BASE_URL,
       token: process.env.JIRA_API_TOKEN,
@@ -61,6 +65,7 @@ const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
       } else {
         await action.updateCodeReviewers();
         await action.autoAssignCreator();
+        await action.setReleasePlatform(releasePlatform);
       }
     }
 

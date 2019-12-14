@@ -105,6 +105,24 @@ describe("Action Class Test", () => {
       sinon.assert.notCalled(jiraStub);
     });
 
+    it("setReleasePlatform() should return send req to Jira", async () => {
+      const jiraStub = sinon
+        .stub(jira, "setReleasePlatform")
+        .resolves({ status: 204 });
+
+      await action.setReleasePlatform('test123');
+      sinon.assert.calledOnce(jiraStub);
+    });
+
+    it("setReleasePlatform() skips empty release platform", async () => {
+      const jiraStub = sinon
+        .stub(jira, "setReleasePlatform")
+        .resolves({ status: 204 });
+
+      await action.setReleasePlatform('');
+      sinon.assert.notCalled(jiraStub);
+    });
+
     it("autoAssignCreator() should return send req to Jira", async () => {
       const jiraStub = sinon
         .stub(jira, "addAssigneeToIssue")
