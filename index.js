@@ -38,7 +38,7 @@ const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
 
     // `release-platform` input defined in action.yml
     const releasePlatform = core.getInput("release-platform");
-    core.debug(`Release Platform: ${releasePlatform}`);
+    core.info(`Release Platform: ${releasePlatform}`);
 
     const config = {
       baseUrl: process.env.JIRA_BASE_URL,
