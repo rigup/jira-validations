@@ -319,4 +319,12 @@ module.exports = class {
       this.core.info(`No Jira user for account id = ${jiraAccountId}`);
     }
   }
+
+  async setReleasePlatform(releasePlatform) {
+    if (!releasePlatform) {
+      return;
+    }
+
+    await this.Jira.setReleasePlatform(this.issue.key, releasePlatform);
+  }
 };

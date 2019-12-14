@@ -22,6 +22,10 @@ If false, will fail a GitHub Check if Validation fails, otherwise all checks wil
 
 Defaults to `"Task,Standalone Task,Bug"`
 
+`release-platform`
+
+(Optional) Value to set for Release Platform in JIRA.
+
 ## Outputs
 
 `verified`
