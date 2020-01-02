@@ -15,7 +15,8 @@ inputs:
     default: "Task,Standalone Task,Bug"
   release-platform: # id of input
     description: "Release Platform in JIRA"
-    required: false
+    required: true
+    default: "other"
 outputs:
   verified: # id of output
     description: "Will be 'true' if it passed all checks, 'false' otherwise"
