@@ -1,6 +1,7 @@
-const JIRA_IDENTIFIER = /^[a-zA-Z]+(?<!id)-\d+/g;
+const JIRA_IDENTIFIER = /[a-zA-Z]+(?<!id)-\d+/;
+const JIRA_BRANCH_REVERT_IDENTIFIER = /^revert-\d+-([a-zA-Z]+-\d+)/;
 const TP_BRANCH_IDENTIFIER = /^(?:issue)?(\d+)\b/g;
-const GITHUB_OWNER = 'rigup';
+const GITHUB_OWNER = "rigup";
 
 module.exports = class {
   constructor({ context, jira, octokit, core, dynamo }) {
@@ -38,36 +39,57 @@ module.exports = class {
     return true;
   }
 
-  validateBranchHasIssueId() {
+  validateBranchHasIssueId(branchName) {
+    this.core.info(`Validating branch name '${branchName}'`);
+    if (branchName.startsWith("revert")) {
+      const matcher = branchName.match(JIRA_BRANCH_REVERT_IDENTIFIER);
+      if (matcher === null) {
+        this.core.error("No issue match for revert branch name");
+        return false;
+      }
+
+      this.core.info(JSON.stringify({ branchName, matcher }));
+      this.issueIds.add(matcher[1]);
+      return true;
+    }
+
     return (
       this.githubEvent.pull_request.head &&
-      this.validateStringHasIssueId(this.githubEvent.pull_request.head.ref)
+      this.validateStringHasIssueId(branchName)
     );
   }
 
-  async validateCommitsHaveIssueIds() {
-    const commits = await this.getCommits();
+  async validateCommitsHaveIssueIds(commits) {
+    this.core.info("Validating commits...");
+    let valid = true;
+
     const masterMergeStart = [
       "Merge branch 'master'",
-      `Merged master into ${this.githubEvent.pull_request.head.ref}`,
+      `Merged master into ${this.githubEvent.pull_request.head.ref}`
     ];
     const originMergeStart = [
       "Merge remote-tracking branch 'origin/master'",
-      `Merge remote-tracking branch '${this.githubEvent.pull_request.head.ref}'`,
+      `Merge remote-tracking branch '${this.githubEvent.pull_request.head.ref}'`
     ];
     const conflictResolutionStart = [
-      `Merge branch '${this.githubEvent.pull_request.head.ref}' of github.com:rigup/${this.githubEvent.repository.name}`,
+      `Merge branch '${this.githubEvent.pull_request.head.ref}' of github.com:rigup/${this.githubEvent.repository.name}`
     ];
-    const filterMatches = [...masterMergeStart, ...originMergeStart, ...conflictResolutionStart];
-
-    let valid = true;
+    const revertStart = [`Revert`];
+    const filterMatches = [
+      ...masterMergeStart,
+      ...originMergeStart,
+      ...conflictResolutionStart,
+      ...revertStart
+    ];
 
     commits
-      .filter((commit) => {
+      .filter(commit => {
         const commitMessage = commit.commit.message;
-        return !filterMatches.some((matcher) => commitMessage.startsWith(matcher));
+        return !filterMatches.some(matcher =>
+          commitMessage.startsWith(matcher)
+        );
       })
-      .forEach((commit) => {
+      .forEach(commit => {
         if (!this.validateStringHasIssueId(commit.commit.message)) {
           this.core.error(
             `Commit message '${commit.commit.message}' doesn't have a valid Jira Issue`
@@ -81,16 +103,28 @@ module.exports = class {
 
   async validate(type, validIssueTypes) {
     let valid = false;
+    const commits = await this.getCommits();
+    const branchName = this.githubEvent.pull_request.head.ref;
+    const validCommits = await this.validateCommitsHaveIssueIds(commits);
+    const validBranch = this.validateBranchHasIssueId(branchName);
+
     switch (type) {
-      case 'all':
-        valid = (await this.validateCommitsHaveIssueIds()) && this.validateBranchHasIssueId();
+      case "all":
+        valid = validCommits && validBranch;
         break;
-      case 'commits':
-        valid = await this.validateCommitsHaveIssueIds();
+      case "commits":
+        valid = validCommits;
+        if (!validBranch) {
+          this.core.warn(`Invalid Branch Warning. Branch name: ${branchName}`);
+        }
         break;
-      case 'branch':
+      case "branch":
       default:
-        valid = this.validateBranchHasIssueId();
+        valid = validBranch;
+        if (!validCommits) {
+          this.core.warn(`Invalid Commits Warning!`);
+        }
+        break;
     }
 
     if (!valid) return false;
@@ -103,9 +137,9 @@ module.exports = class {
 
     if (validIssueTypes.indexOf(issue.fields.issuetype.name) === -1) {
       this.core.error(
-        `Issue type ${issue.fields.issuetype.name} is not one of '${JSON.stringify(
-          validIssueTypes
-        )}'`
+        `Issue type ${
+          issue.fields.issuetype.name
+        } is not one of '${JSON.stringify(validIssueTypes)}'`
       );
       return false;
     }
@@ -116,33 +150,40 @@ module.exports = class {
 
   getCodeReviewers() {
     this.core.info(
-      `Reviewers: ${this.githubEvent.pull_request.requested_reviewers.map((r) => r.login)}`
+      `Reviewers: ${this.githubEvent.pull_request.requested_reviewers.map(
+        r => r.login
+      )}`
     );
-    return this.githubEvent.pull_request.requested_reviewers.map((rev) => ({
+    return this.githubEvent.pull_request.requested_reviewers.map(rev => ({
       login: rev.login,
-      id: rev.id,
+      id: rev.id
     }));
   }
 
-  getApprovers() {
-    return this.githubEvent.pull_request.assignees.map((assignee) => ({
+  getAssignees() {
+    return this.githubEvent.pull_request.assignees.map(assignee => ({
       login: assignee.login,
-      id: assignee.id,
+      id: assignee.id
     }));
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getApprovers() {
+    return [];
   }
 
   async getCommits() {
     this.core.info(
       JSON.stringify({
         repo: this.githubEvent.repository.name,
-        pull_number: this.githubEvent.number,
+        pull_number: this.githubEvent.number
       })
     );
 
     const { data } = await this.octkit.pulls.listCommits({
       owner: GITHUB_OWNER,
       repo: this.githubEvent.repository.name,
-      pull_number: this.githubEvent.number,
+      pull_number: this.githubEvent.number
     });
     return data;
   }
@@ -167,23 +208,40 @@ module.exports = class {
   async updateCodeReviewers() {
     const reviewers = this.getCodeReviewers();
     if (!reviewers || reviewers.length === 0) {
-      this.core.info('No Reviewers!');
+      this.core.info("No Reviewers!");
       return;
     }
 
     const rigupReviewers = await Promise.all(
-      reviewers.map(async (reviewer) => {
+      reviewers.map(async reviewer => {
         return this.dynamo.findByGithubId(reviewer.id);
       })
     );
 
-    const jiraAccountIds = rigupReviewers.map((rev) => rev.Items[0].bitbucketId.S);
-    const resp = await this.Jira.getUsersFromAccountIds(jiraAccountIds);
+    const jiraAccountIds = rigupReviewers.reduce((reviewerSet, record) => {
+      if (record.Items[0].atlassianId) {
+        reviewerSet.add(record.Items[0].atlassianId["S"]);
+      } else {
+        this.core.info(
+          `Unknown Atlassian user ${record.Items[0].fullName["S"]}`
+        );
+      }
+      return reviewerSet;
+    }, new Set());
+
+    const currentCodeReviewers = this.issue.fields.customfield_10180;
+    if (currentCodeReviewers && currentCodeReviewers.length > 0) {
+      currentCodeReviewers.forEach(rev => jiraAccountIds.add(rev.accountId));
+    }
+
+    const resp = await this.Jira.getUsersFromAccountIds(
+      Array.from(jiraAccountIds)
+    );
 
     if (resp && resp.data && resp.data.values) {
       this.core.info(
         `Adding Jira Users as Code Reviewers: ${JSON.stringify(
-          resp.data.values.map((user) => user.displayName)
+          resp.data.values.map(user => user.displayName)
         )}`
       );
       this.Jira.addCodeReviewersToIssue(this.issue.key, resp.data.values);
@@ -194,23 +252,31 @@ module.exports = class {
     const approvers = this.getApprovers();
 
     if (!approvers || approvers.length === 0) {
-      this.core.info('No Approvers!');
+      this.core.info("No Approvers!");
       return;
     }
 
     const rigupApprovers = await Promise.all(
-      approvers.map(async (approver) => {
+      approvers.map(async approver => {
         return this.dynamo.findByGithubId(approver.id);
       })
     );
 
-    const jiraAccountIds = rigupApprovers.map((rev) => rev.Items[0].bitbucketId.S);
+    const jiraAccountIds = rigupApprovers.reduce((approvers, record) => {
+      if (record.Items[0].atlassianId) {
+        approvers.push(record.Items[0].atlassianId["S"]);
+      } else {
+        this.core.info(`Unknown Atlassian user ${record.Items[0].fullName.S}`);
+      }
+      return approvers;
+    }, []);
+
     const resp = await this.Jira.getUsersFromAccountIds(jiraAccountIds);
 
     if (resp && resp.data && resp.data.values) {
       this.core.info(
         `Adding Jira Users as Approvers: ${JSON.stringify(
-          resp.data.values.map((user) => user.displayName)
+          resp.data.values.map(user => user.displayName)
         )}`
       );
       this.Jira.addApproversToIssue(this.issue.key, resp.data.values);
@@ -221,20 +287,44 @@ module.exports = class {
     const { user } = this.githubEvent.pull_request;
     if (!user) {
       this.core.error(`No User on PR? - ${user}`);
+      return;
     }
 
-    const rigupUser = await this.dynamo.findByGithubId(user.id);
+    let rigupUser;
+    try {
+      rigupUser = await this.dynamo.findByGithubId(user.id);
+    } catch (error) {
+      this.core.error(error);
+      return;
+    }
 
     if (!rigupUser) {
       this.core.error(`PR by unknown user? - ${user}`);
+      return;
     }
 
-    const jiraAccountId = rigupUser.Items[0].bitbucketId.S;
+    if (!rigupUser.Items[0].atlassianId) {
+      this.core.error("Unknown Atlassian user");
+      return;
+    }
+    const jiraAccountId = rigupUser.Items[0].atlassianId["S"];
     const resp = await this.Jira.getUsersFromAccountIds([jiraAccountId]);
 
-    if (resp && resp.data && resp.data.values) {
-      this.core.info(`Adding PR Creator, ${resp.data.values[0].name}, as ticket assignee`);
+    if (resp && resp.data && resp.data.values && resp.data.values[0]) {
+      this.core.info(
+        `Adding PR Creator, ${resp.data.values[0].name}, as ticket assignee`
+      );
       this.Jira.addAssigneeToIssue(this.issue.key, resp.data.values[0]);
+    } else {
+      this.core.info(`No Jira user for account id = ${jiraAccountId}`);
     }
+  }
+
+  async setReleasePlatform(releasePlatform) {
+    if (!releasePlatform) {
+      return;
+    }
+
+    await this.Jira.setReleasePlatform(this.issue.key, releasePlatform);
   }
 };

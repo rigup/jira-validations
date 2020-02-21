@@ -12,7 +12,11 @@ inputs:
   allowed-issue-types: # id of input
     description: "Allowed Issue Types, comma separated, can be 'Task,Standalone Task,Bug'"
     required: true
-    default: "Task,Standalone Task,Bug,Technical Innovation,Product Innovation,Technical Debt, Documentation, Request"
+    default: "Task,Standalone Task,Bug,Technical Innovation,Product Innovation,Technical Debt,Documentation,Request"
+  release-platform: # id of input
+    description: "Release Platform in JIRA"
+    required: true
+    default: "other"
 outputs:
   verified: # id of output
     description: "Will be 'true' if it passed all checks, 'false' otherwise"

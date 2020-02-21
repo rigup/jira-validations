@@ -76,4 +76,11 @@ describe('Jira Class Test', () => {
     const edit = await jira.addAssigneeToIssue('EE-299', users[0]);
     assert.notEqual(null, edit);
   });
+
+  it('setReleasePlatform should set release platform for an issue', async () => {
+    const accountIds = ['5be06148923d3245b8ba1a1f'];
+
+    const edit = await jira.setReleasePlatform('EE-859', 'other');
+    assert.notEqual(null, edit);
+  });
 });

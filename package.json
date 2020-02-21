@@ -31,7 +31,7 @@
     "@pollyjs/adapter-node-http": "^2.6.2",
     "@pollyjs/core": "^2.6.2",
     "@pollyjs/persister-fs": "^2.6.2",
-    "@rigup/eslint-config-rigup": "^0.0.8",
+    "@rigup/eslint-config-rigup": "^0.0.10",
     "aws-sdk-mock": "^4.5.0",
     "chai": "^4.2.0",
     "dotenv": "^8.0.0",
