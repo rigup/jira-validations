@@ -34,6 +34,8 @@ const Action = require("./action");
       "Technical Innovation",
       "Technical Debt",
       "Product Innovation"
+      "Request",
+      "Documentation"
     ];
     core.info(
       `Allowed Issue Types - ${JSON.stringify(allowedIssueTypesInput)}`
