@@ -36,7 +36,9 @@ const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
       "Bug",
       "Technical Innovation",
       "Technical Debt",
-      "Product Innovation"
+      "Product Innovation",
+      "Request",
+      "Documentation"
     ];
     core.info(
       `Allowed Issue Types - ${JSON.stringify(allowedIssueTypesInput)}`
