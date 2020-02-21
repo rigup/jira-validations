@@ -1,6 +1,6 @@
 # Jira Validations JavaScript Action
 
-This action prints verfied 'true' or 'false' if the github event contains a valid Jira Issue ID.
+This action prints verified 'true' or 'false' if the github event contains a valid Jira Issue ID.
 
 Action also checks DynamoDB for User lookup information. A.k.a mapping a Github ID to a Jira Account ID.
 
@@ -21,6 +21,10 @@ If false, will fail a GitHub Check if Validation fails, otherwise all checks wil
 **Required** Comma separated list of allowed Issue Types. If the matching issue type isn't in this list, validation fails.
 
 Defaults to `"Task,Standalone Task,Bug"`
+
+`release-platform`
+
+(Optional) Value to set for Release Platform in JIRA.
 
 ## Outputs
 
@@ -95,7 +99,7 @@ So you'll need a valid branch name with Jira issue key, as well as all commit me
 Compile the `index.js` file.
 
 ```
-ncc build index.js
+npm run build
 ```
 
 You'll see a new dist/index.js file with your code and the compiled modules.
