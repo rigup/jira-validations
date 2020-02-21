@@ -4,6 +4,9 @@ const Dynamo = require("./lib/dynamo");
 const Jira = require("./lib/jira");
 const Action = require("./action");
 
+const GITHUB_OWNER = "rigup";
+const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
+
 (async () => {
   try {
     if (!process.env.JIRA_BASE_URL)
@@ -39,6 +42,10 @@ const Action = require("./action");
       `Allowed Issue Types - ${JSON.stringify(allowedIssueTypesInput)}`
     );
 
+      // `release-platform` input defined in action.yml
+      const releasePlatform = core.getInput("release-platform");
+      core.info(`Release Platform: ${releasePlatform}`);
+
     const config = {
       baseUrl: process.env.JIRA_BASE_URL,
       token: process.env.JIRA_API_TOKEN,
@@ -51,21 +58,26 @@ const Action = require("./action");
     const { context } = github;
     const action = new Action({ context, jira, octokit, core, dynamo });
 
+    const isRobot =
+      ROBOTS.indexOf(context.payload.pull_request.user.login) !== -1;
+    core.info(`Is Robot - ${isRobot}`);
+
     let valid = true;
-    if (!action.isTargetProcess()) {
+    if (!isRobot && !action.isTargetProcess()) {
       valid = await action.validate(verifyFromInput, allowedIssueTypesInput);
 
       if (!valid && failInvalidInput === "true") {
         core.setFailed("Validation Failed!");
       } else {
         await action.updateCodeReviewers();
-        await action.updateApprovers();
         await action.autoAssignCreator();
+        await action.setReleasePlatform(releasePlatform);
       }
     }
 
     core.setOutput("verified", `${valid}`);
   } catch (error) {
-    core.setFailed(JSON.stringify(error));
+    core.error(error);
+    core.setFailed(error);
   }
 })();
