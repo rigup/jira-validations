@@ -29,9 +29,17 @@ const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
     core.debug(`Fail Invalid? ${failInvalidInput}`);
 
     // `allowed-issue-types` input defined in action.yml
-    const allowedIssueTypesInput = core
-      .getInput("allowed-issue-types")
-      .split(",");
+    // const allowedIssueTypesInput = core.getInput('allowed-issue-types').split(',');
+    const allowedIssueTypesInput = [
+      "Task",
+      "Standalone Task",
+      "Bug",
+      "Technical Innovation",
+      "Technical Debt",
+      "Product Innovation"
+      "Request",
+      "Documentation"
+    ];
     core.info(
       `Allowed Issue Types - ${JSON.stringify(allowedIssueTypesInput)}`
     );
