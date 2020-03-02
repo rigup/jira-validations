@@ -36,7 +36,7 @@ const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
       "Bug",
       "Technical Innovation",
       "Technical Debt",
-      "Product Innovation"
+      "Product Innovation",
       "Request",
       "Documentation"
     ];
@@ -44,9 +44,9 @@ const ROBOTS = ["dependabot[bot]", "dependabot-preview[bot]"];
       `Allowed Issue Types - ${JSON.stringify(allowedIssueTypesInput)}`
     );
 
-    // `release-platform` input defined in action.yml
-    const releasePlatform = core.getInput("release-platform");
-    core.info(`Release Platform: ${releasePlatform}`);
+      // `release-platform` input defined in action.yml
+      const releasePlatform = core.getInput("release-platform");
+      core.info(`Release Platform: ${releasePlatform}`);
 
     const config = {
       baseUrl: process.env.JIRA_BASE_URL,
