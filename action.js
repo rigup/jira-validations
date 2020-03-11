@@ -167,11 +167,6 @@ module.exports = class {
     }));
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  getApprovers() {
-    return [];
-  }
-
   async getCommits() {
     this.core.info(
       JSON.stringify({
@@ -218,15 +213,18 @@ module.exports = class {
       })
     );
 
-    const jiraAccountIds = rigupReviewers.reduce((reviewerSet, record) => {
-      if (record.Items[0].atlassianId) {
-        reviewerSet.add(record.Items[0].atlassianId["S"]);
+    const jiraAccountIds = rigupReviewers.reduce((set, result, idx) => {
+      if (!result.Count) {
+        this.core.info(`Unknown Dynamo user ${reviewers[idx].login}`);
       } else {
-        this.core.info(
-          `Unknown Atlassian user ${record.Items[0].fullName["S"]}`
-        );
+        const { atlassianId, fullName } = result.Items[0];
+        if (!atlassianId) {
+          this.core.info(`Unknown Atlassian user ${fullName.S}`);
+        } else {
+          set.add(atlassianId.S);
+        }
       }
-      return reviewerSet;
+      return set;
     }, new Set());
 
     const currentCodeReviewers = this.issue.fields.customfield_10180;
@@ -248,41 +246,6 @@ module.exports = class {
     }
   }
 
-  async updateApprovers() {
-    const approvers = this.getApprovers();
-
-    if (!approvers || approvers.length === 0) {
-      this.core.info("No Approvers!");
-      return;
-    }
-
-    const rigupApprovers = await Promise.all(
-      approvers.map(async approver => {
-        return this.dynamo.findByGithubId(approver.id);
-      })
-    );
-
-    const jiraAccountIds = rigupApprovers.reduce((approvers, record) => {
-      if (record.Items[0].atlassianId) {
-        approvers.push(record.Items[0].atlassianId["S"]);
-      } else {
-        this.core.info(`Unknown Atlassian user ${record.Items[0].fullName.S}`);
-      }
-      return approvers;
-    }, []);
-
-    const resp = await this.Jira.getUsersFromAccountIds(jiraAccountIds);
-
-    if (resp && resp.data && resp.data.values) {
-      this.core.info(
-        `Adding Jira Users as Approvers: ${JSON.stringify(
-          resp.data.values.map(user => user.displayName)
-        )}`
-      );
-      this.Jira.addApproversToIssue(this.issue.key, resp.data.values);
-    }
-  }
-
   async autoAssignCreator() {
     const { user } = this.githubEvent.pull_request;
     if (!user) {
@@ -298,7 +261,7 @@ module.exports = class {
       return;
     }
 
-    if (!rigupUser) {
+    if (!(rigupUser && rigupUser.Count)) {
       this.core.error(`PR by unknown user? - ${user}`);
       return;
     }
