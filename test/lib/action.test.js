@@ -96,15 +96,6 @@ describe("Action Class Test", () => {
       sinon.assert.calledOnce(jiraStub);
     });
 
-    it("updateApprovers() should return send req to Jira", async () => {
-      const jiraStub = sinon
-        .stub(jira, "addApproversToIssue")
-        .resolves({ status: 204 });
-
-      await action.updateApprovers();
-      sinon.assert.notCalled(jiraStub);
-    });
-
     it("setReleasePlatform() should return send req to Jira", async () => {
       const jiraStub = sinon
         .stub(jira, "setReleasePlatform")

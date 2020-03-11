@@ -167,11 +167,6 @@ module.exports = class {
     }));
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  getApprovers() {
-    return [];
-  }
-
   async getCommits() {
     this.core.info(
       JSON.stringify({
@@ -245,41 +240,6 @@ module.exports = class {
         )}`
       );
       this.Jira.addCodeReviewersToIssue(this.issue.key, resp.data.values);
-    }
-  }
-
-  async updateApprovers() {
-    const approvers = this.getApprovers();
-
-    if (!approvers || approvers.length === 0) {
-      this.core.info("No Approvers!");
-      return;
-    }
-
-    const rigupApprovers = await Promise.all(
-      approvers.map(async approver => {
-        return this.dynamo.findByGithubId(approver.id);
-      })
-    );
-
-    const jiraAccountIds = rigupApprovers.reduce((approvers, record) => {
-      if (record.Items[0].atlassianId) {
-        approvers.push(record.Items[0].atlassianId["S"]);
-      } else {
-        this.core.info(`Unknown Atlassian user ${record.Items[0].fullName.S}`);
-      }
-      return approvers;
-    }, []);
-
-    const resp = await this.Jira.getUsersFromAccountIds(jiraAccountIds);
-
-    if (resp && resp.data && resp.data.values) {
-      this.core.info(
-        `Adding Jira Users as Approvers: ${JSON.stringify(
-          resp.data.values.map(user => user.displayName)
-        )}`
-      );
-      this.Jira.addApproversToIssue(this.issue.key, resp.data.values);
     }
   }
 
