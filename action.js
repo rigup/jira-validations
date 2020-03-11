@@ -213,15 +213,18 @@ module.exports = class {
       })
     );
 
-    const jiraAccountIds = rigupReviewers.reduce((reviewerSet, record) => {
-      if (record.Items[0].atlassianId) {
-        reviewerSet.add(record.Items[0].atlassianId["S"]);
+    const jiraAccountIds = rigupReviewers.reduce((set, result, idx) => {
+      if (!result.Count) {
+        this.core.info(`Unknown Dynamo user ${reviewers[idx].login}`);
       } else {
-        this.core.info(
-          `Unknown Atlassian user ${record.Items[0].fullName["S"]}`
-        );
+        const { atlassianId, fullName } = result.Items[0];
+        if (!atlassianId) {
+          this.core.info(`Unknown Atlassian user ${fullName.S}`);
+        } else {
+          set.add(atlassianId.S);
+        }
       }
-      return reviewerSet;
+      return set;
     }, new Set());
 
     const currentCodeReviewers = this.issue.fields.customfield_10180;
@@ -258,7 +261,7 @@ module.exports = class {
       return;
     }
 
-    if (!rigupUser) {
+    if (!(rigupUser && rigupUser.Count)) {
       this.core.error(`PR by unknown user? - ${user}`);
       return;
     }
