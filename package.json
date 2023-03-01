@@ -38,7 +38,7 @@
     "eslint": "^6.2.1",
     "jasmine": "^3.1.0",
     "lint-staged": "~8.2.0",
-    "mocha": "^6.2.0",
+    "mocha": "^6.2.3",
     "pre-commit": "^1.2.2",
     "rewire": "^4.0.1",
     "sinon": "^7.4.1"
